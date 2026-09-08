@@ -1,0 +1,33 @@
+[
+  {
+    "id": "app-1",
+    "referenceCode": "SAW-2026-98401",
+    "role": "kokpit",
+    "tc": "12345678901",
+    "name": "Kpt. Mehmet Yılmaz",
+    "email": "mehmet.yilmaz@pilot.org",
+    "phone": "0532 111 2233",
+    "plate": "34 THY 1933",
+    "kvkkAccepted": true,
+    "explicitConsentAccepted": true,
+    "isTalpaMember": true,
+    "status": "approved",
+    "adminNotes": "TALPA Üyeliği doğrulandı. Belgeler tam.",
+    "createdAt": "2026-09-06T18:55:04.230Z"
+  },
+  {
+    "id": "app-2",
+    "referenceCode": "SAW-2026-98402",
+    "role": "kabin",
+    "tc": "98765432109",
+    "name": "Ayşe Kaya",
+    "email": "ayse.kaya@airline.com",
+    "phone": "0555 999 8877",
+    "plate": "06 KPT 404",
+    "kvkkAccepted": true,
+    "explicitConsentAccepted": true,
+    "isTalpaMember": false,
+    "status": "pending",
+    "createdAt": "2026-09-08T13:55:04.236Z"
+  }
+]

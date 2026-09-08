@@ -1,0 +1,654 @@
+[
+  {
+    "tc": "15155737756",
+    "name": "Kpt. İsmail Doğan",
+    "plate1": "34 AVN 657",
+    "plate2": "16 TK 5353",
+    "isCompleted": false
+  },
+  {
+    "tc": "86848806042",
+    "name": "Kpt. Salih Korkmaz",
+    "plate1": "07 IST 674",
+    "plate2": "07 TC 5384",
+    "isCompleted": false
+  },
+  {
+    "tc": "67531975306",
+    "name": "Kpt. Burak Çelik",
+    "plate1": "34 THY 691",
+    "plate2": "06 IZM 5415",
+    "isCompleted": false
+  },
+  {
+    "tc": "48224044660",
+    "name": "F/O Ayşe Çetin",
+    "plate1": "34 AVN 708",
+    "plate2": "34 IST 5446",
+    "isCompleted": false
+  },
+  {
+    "tc": "29917113924",
+    "name": "F/O Özlem Yavuz",
+    "plate1": "07 IST 725",
+    "plate2": "34 CPT 5477",
+    "isCompleted": false
+  },
+  {
+    "tc": "90600282210",
+    "name": "Uçuş İşl. Mustafa Yıldırım",
+    "plate1": "34 THY 742",
+    "plate2": "41 SKY 5508",
+    "isCompleted": false
+  },
+  {
+    "tc": "71393351574",
+    "name": "Kpt. Ömer Kurt",
+    "plate1": "34 AVN 759",
+    "plate2": "35 AIR 5539",
+    "isCompleted": false
+  },
+  {
+    "tc": "52086420838",
+    "name": "Kpt. Fatih Aksoy",
+    "plate1": "07 IST 776",
+    "plate2": "34 PLT 5570",
+    "isCompleted": false
+  },
+  {
+    "tc": "33779599192",
+    "name": "Kpt. Volkan Özdemir",
+    "plate1": "34 THY 793",
+    "plate2": "34 THY 5601",
+    "isCompleted": false
+  },
+  {
+    "tc": "14462668456",
+    "name": "Kpt. Emine Polat",
+    "plate1": "34 AVN 810",
+    "plate2": "16 VIP 5632",
+    "isCompleted": false
+  },
+  {
+    "tc": "85155737742",
+    "name": "F/O Seda Kaya",
+    "plate1": "07 IST 827",
+    "plate2": "07 ANK 5663",
+    "isCompleted": false
+  },
+  {
+    "tc": "66848806006",
+    "name": "F/O Hüseyin Kılıç",
+    "plate1": "34 THY 844",
+    "plate2": "06 JET 5694",
+    "isCompleted": false
+  },
+  {
+    "tc": "47531975360",
+    "name": "Uçuş İşl. Halil Çakır",
+    "plate1": "34 AVN 861",
+    "plate2": "34 AER 5725",
+    "isCompleted": false
+  },
+  {
+    "tc": "28224044624",
+    "name": "Kpt. Emre Şahin",
+    "plate1": "07 IST 878",
+    "plate2": "34 AVN 5756",
+    "isCompleted": false
+  },
+  {
+    "tc": "99917113910",
+    "name": "Kpt. Tolga Kara",
+    "plate1": "34 THY 895",
+    "plate2": "41 FLY 5787",
+    "isCompleted": false
+  },
+  {
+    "tc": "70600282274",
+    "name": "Kpt. Zeynep Güler",
+    "plate1": "34 AVN 912",
+    "plate2": "35 TK 5818",
+    "isCompleted": false
+  },
+  {
+    "tc": "51393351538",
+    "name": "Kpt. Esra Öztürk",
+    "plate1": "07 IST 929",
+    "plate2": "34 TC 5849",
+    "isCompleted": false
+  },
+  {
+    "tc": "32086420892",
+    "name": "F/O İbrahim Özkan",
+    "plate1": "34 THY 946",
+    "plate2": "34 IZM 5880",
+    "isCompleted": false
+  },
+  {
+    "tc": "13779599156",
+    "name": "F/O Abdullah Avcı",
+    "plate1": "34 AVN 963",
+    "plate2": "16 IST 5911",
+    "isCompleted": false
+  },
+  {
+    "tc": "84462668442",
+    "name": "Uçuş İşl. Serkan Arslan",
+    "plate1": "07 IST 980",
+    "plate2": "07 CPT 5942",
+    "isCompleted": false
+  },
+  {
+    "tc": "65155737706",
+    "name": "Kpt. Barış Özcan",
+    "plate1": "34 THY 997",
+    "plate2": "06 SKY 5973",
+    "isCompleted": false
+  },
+  {
+    "tc": "46848806060",
+    "name": "Kpt. Merve Demir",
+    "plate1": "34 AVN 114",
+    "plate2": "34 AIR 6004",
+    "isCompleted": true,
+    "selectedPlate": "34 AVN 114",
+    "selectionType": "plate1",
+    "submittedAt": "2026-08-30T08:11:04.090Z",
+    "updatedAt": "2026-08-30T08:38:09.264Z",
+    "referenceCode": "TALPA-PLK-20640"
+  },
+  {
+    "tc": "27531975324",
+    "name": "Kpt. Mehmet Aslan",
+    "plate1": "07 IST 131",
+    "plate2": "34 PLT 6035",
+    "isCompleted": false
+  },
+  {
+    "tc": "98224044610",
+    "name": "Kpt. Murat Erdoğan",
+    "plate1": "34 THY 148",
+    "plate2": "41 THY 6066",
+    "isCompleted": false
+  },
+  {
+    "tc": "79917113974",
+    "name": "F/O Recep Yıldız",
+    "plate1": "34 AVN 165",
+    "plate2": "35 VIP 6097",
+    "isCompleted": false
+  },
+  {
+    "tc": "50600282238",
+    "name": "F/O Onur Koç",
+    "plate1": "07 IST 182",
+    "plate2": "34 ANK 6128",
+    "isCompleted": false
+  },
+  {
+    "tc": "31393351592",
+    "name": "Uçuş İşl. Fatma Güneş",
+    "plate1": "34 THY 199",
+    "plate2": "34 JET 6159",
+    "isCompleted": false
+  },
+  {
+    "tc": "12086420856",
+    "name": "Kpt. Ebru Aydın",
+    "plate1": "34 AVN 216",
+    "plate2": "16 AER 6190",
+    "isCompleted": false
+  },
+  {
+    "tc": "83779599142",
+    "name": "Kpt. Ali Şimşek",
+    "plate1": "07 IST 233",
+    "plate2": "07 AVN 6221",
+    "isCompleted": false
+  },
+  {
+    "tc": "64462668406",
+    "name": "Kpt. Ramazan Yılmaz",
+    "plate1": "34 THY 250",
+    "plate2": "06 FLY 6252",
+    "isCompleted": false
+  },
+  {
+    "tc": "45155737760",
+    "name": "Kpt. Kadir Doğan",
+    "plate1": "34 AVN 267",
+    "plate2": "34 TK 6283",
+    "isCompleted": false
+  },
+  {
+    "tc": "26848806024",
+    "name": "F/O Cem Korkmaz",
+    "plate1": "07 IST 284",
+    "plate2": "34 TC 6314",
+    "isCompleted": false
+  },
+  {
+    "tc": "97531975310",
+    "name": "F/O Hatice Çelik",
+    "plate1": "34 THY 301",
+    "plate2": "41 IZM 6345",
+    "isCompleted": false
+  },
+  {
+    "tc": "78224044674",
+    "name": "Uçuş İşl. Büşra Çetin",
+    "plate1": "34 AVN 318",
+    "plate2": "35 IST 6376",
+    "isCompleted": false
+  },
+  {
+    "tc": "59917113938",
+    "name": "Kpt. Hasan Yavuz",
+    "plate1": "07 IST 335",
+    "plate2": "34 CPT 6407",
+    "isCompleted": false
+  },
+  {
+    "tc": "30600282292",
+    "name": "Kpt. Süleyman Yıldırım",
+    "plate1": "34 THY 352",
+    "plate2": "34 SKY 6438",
+    "isCompleted": false
+  },
+  {
+    "tc": "11393351556",
+    "name": "Kpt. Hakan Kurt",
+    "plate1": "34 AVN 369",
+    "plate2": "16 AIR 6469",
+    "isCompleted": false
+  },
+  {
+    "tc": "82086420842",
+    "name": "Kpt. Kemal Aksoy",
+    "plate1": "07 IST 386",
+    "plate2": "07 PLT 6500",
+    "isCompleted": false
+  },
+  {
+    "tc": "63779599106",
+    "name": "F/O Elif Özdemir",
+    "plate1": "34 THY 403",
+    "plate2": "06 THY 6531",
+    "isCompleted": false
+  },
+  {
+    "tc": "44462668460",
+    "name": "F/O Ahmet Polat",
+    "plate1": "34 AVN 420",
+    "plate2": "34 VIP 6562",
+    "isCompleted": false
+  },
+  {
+    "tc": "25155737724",
+    "name": "Uçuş İşl. İsmail Kaya",
+    "plate1": "07 IST 437",
+    "plate2": "34 ANK 6593",
+    "isCompleted": false
+  },
+  {
+    "tc": "96848806010",
+    "name": "Kpt. Salih Kılıç",
+    "plate1": "34 THY 454",
+    "plate2": "41 JET 6624",
+    "isCompleted": false
+  },
+  {
+    "tc": "77531975374",
+    "name": "Kpt. Burak Çakır",
+    "plate1": "34 AVN 471",
+    "plate2": "35 AER 6655",
+    "isCompleted": false
+  },
+  {
+    "tc": "58224044638",
+    "name": "Kpt. Ayşe Şahin",
+    "plate1": "07 IST 488",
+    "plate2": "34 AVN 6686",
+    "isCompleted": false
+  },
+  {
+    "tc": "39917113992",
+    "name": "Kpt. Özlem Kara",
+    "plate1": "34 THY 505",
+    "plate2": "34 FLY 6717",
+    "isCompleted": false
+  },
+  {
+    "tc": "10600282256",
+    "name": "F/O Mustafa Güler",
+    "plate1": "34 AVN 522",
+    "plate2": "16 TK 6748",
+    "isCompleted": false
+  },
+  {
+    "tc": "81393351542",
+    "name": "F/O Ömer Öztürk",
+    "plate1": "07 IST 539",
+    "plate2": "07 TC 6779",
+    "isCompleted": false
+  },
+  {
+    "tc": "62086420806",
+    "name": "Uçuş İşl. Fatih Özkan",
+    "plate1": "34 THY 556",
+    "plate2": "06 IZM 6810",
+    "isCompleted": false
+  },
+  {
+    "tc": "43779599160",
+    "name": "Kpt. Volkan Avcı",
+    "plate1": "34 AVN 573",
+    "plate2": "34 IST 6841",
+    "isCompleted": false
+  },
+  {
+    "tc": "24462668424",
+    "name": "Kpt. Emine Arslan",
+    "plate1": "07 IST 590",
+    "plate2": "34 CPT 6872",
+    "isCompleted": false
+  },
+  {
+    "tc": "95155737710",
+    "name": "Kpt. Seda Özcan",
+    "plate1": "34 THY 607",
+    "plate2": "41 SKY 6903",
+    "isCompleted": false
+  },
+  {
+    "tc": "76848806074",
+    "name": "Kpt. Hüseyin Demir",
+    "plate1": "34 AVN 624",
+    "plate2": "35 AIR 6934",
+    "isCompleted": false
+  },
+  {
+    "tc": "57531975338",
+    "name": "F/O Halil Aslan",
+    "plate1": "07 IST 641",
+    "plate2": "34 PLT 6965",
+    "isCompleted": false
+  },
+  {
+    "tc": "38224044692",
+    "name": "F/O Emre Erdoğan",
+    "plate1": "34 THY 658",
+    "plate2": "34 THY 6996",
+    "isCompleted": false
+  },
+  {
+    "tc": "19917113956",
+    "name": "Uçuş İşl. Tolga Yıldız",
+    "plate1": "34 AVN 675",
+    "plate2": "16 VIP 7027",
+    "isCompleted": false
+  },
+  {
+    "tc": "80600282242",
+    "name": "Kpt. Zeynep Koç",
+    "plate1": "07 IST 692",
+    "plate2": "07 ANK 7058",
+    "isCompleted": false
+  },
+  {
+    "tc": "61393351506",
+    "name": "Kpt. Esra Güneş",
+    "plate1": "34 THY 709",
+    "plate2": "06 JET 7089",
+    "isCompleted": false
+  },
+  {
+    "tc": "42086420860",
+    "name": "Kpt. İbrahim Aydın",
+    "plate1": "34 AVN 726",
+    "plate2": "34 AER 7120",
+    "isCompleted": false
+  },
+  {
+    "tc": "23779599124",
+    "name": "Kpt. Abdullah Şimşek",
+    "plate1": "07 IST 743",
+    "plate2": "34 AVN 7151",
+    "isCompleted": false
+  },
+  {
+    "tc": "94462668410",
+    "name": "F/O Serkan Yılmaz",
+    "plate1": "34 THY 760",
+    "plate2": "41 FLY 7182",
+    "isCompleted": false
+  },
+  {
+    "tc": "75155737774",
+    "name": "F/O Barış Doğan",
+    "plate1": "34 AVN 777",
+    "plate2": "35 TK 7213",
+    "isCompleted": false
+  },
+  {
+    "tc": "56848806038",
+    "name": "Uçuş İşl. Merve Korkmaz",
+    "plate1": "07 IST 794",
+    "plate2": "34 TC 7244",
+    "isCompleted": false
+  },
+  {
+    "tc": "37531975392",
+    "name": "Kpt. Mehmet Çelik",
+    "plate1": "34 THY 811",
+    "plate2": "34 IZM 7275",
+    "isCompleted": false
+  },
+  {
+    "tc": "18224044656",
+    "name": "Kpt. Murat Çetin",
+    "plate1": "34 AVN 828",
+    "plate2": "16 IST 7306",
+    "isCompleted": false
+  },
+  {
+    "tc": "89917113942",
+    "name": "Kpt. Recep Yavuz",
+    "plate1": "07 IST 845",
+    "plate2": "07 CPT 7337",
+    "isCompleted": false
+  },
+  {
+    "tc": "60600282206",
+    "name": "Kpt. Onur Yıldırım",
+    "plate1": "34 THY 862",
+    "plate2": "06 SKY 7368",
+    "isCompleted": false
+  },
+  {
+    "tc": "41393351560",
+    "name": "F/O Fatma Kurt",
+    "plate1": "34 AVN 879",
+    "plate2": "34 AIR 7399",
+    "isCompleted": false
+  },
+  {
+    "tc": "22086420824",
+    "name": "F/O Ebru Aksoy",
+    "plate1": "07 IST 896",
+    "plate2": "34 PLT 7430",
+    "isCompleted": false
+  },
+  {
+    "tc": "93779599110",
+    "name": "Uçuş İşl. Ali Özdemir",
+    "plate1": "34 THY 913",
+    "plate2": "41 THY 7461",
+    "isCompleted": false
+  },
+  {
+    "tc": "74462668474",
+    "name": "Kpt. Ramazan Polat",
+    "plate1": "34 AVN 930",
+    "plate2": "35 VIP 7492",
+    "isCompleted": false
+  },
+  {
+    "tc": "55155737738",
+    "name": "Kpt. Kadir Kaya",
+    "plate1": "07 IST 947",
+    "plate2": "34 ANK 7523",
+    "isCompleted": false
+  },
+  {
+    "tc": "36848806092",
+    "name": "Kpt. Cem Kılıç",
+    "plate1": "34 THY 964",
+    "plate2": "34 JET 7554",
+    "isCompleted": false
+  },
+  {
+    "tc": "17531975356",
+    "name": "Kpt. Hatice Çakır",
+    "plate1": "34 AVN 981",
+    "plate2": "16 AER 7585",
+    "isCompleted": false
+  },
+  {
+    "tc": "88224044642",
+    "name": "F/O Büşra Şahin",
+    "plate1": "07 IST 998",
+    "plate2": "07 AVN 7616",
+    "isCompleted": false
+  },
+  {
+    "tc": "69917113906",
+    "name": "F/O Hasan Kara",
+    "plate1": "34 THY 115",
+    "plate2": "06 FLY 7647",
+    "isCompleted": false
+  },
+  {
+    "tc": "40600282260",
+    "name": "Uçuş İşl. Süleyman Güler",
+    "plate1": "34 AVN 132",
+    "plate2": "34 TK 7678",
+    "isCompleted": false
+  },
+  {
+    "tc": "21393351524",
+    "name": "Kpt. Hakan Öztürk",
+    "plate1": "07 IST 149",
+    "plate2": "34 TC 7709",
+    "isCompleted": false
+  },
+  {
+    "tc": "92086420810",
+    "name": "Kpt. Kemal Özkan",
+    "plate1": "34 THY 166",
+    "plate2": "41 IZM 7740",
+    "isCompleted": false
+  },
+  {
+    "tc": "73779599174",
+    "name": "Kpt. Elif Avcı",
+    "plate1": "34 AVN 183",
+    "plate2": "35 IST 7771",
+    "isCompleted": false
+  },
+  {
+    "tc": "54462668438",
+    "name": "Kpt. Ahmet Arslan",
+    "plate1": "07 IST 200",
+    "plate2": "34 CPT 7802",
+    "isCompleted": false
+  },
+  {
+    "tc": "35155737792",
+    "name": "F/O Kadir Özcan",
+    "plate1": "34 THY 487",
+    "plate2": "34 SKY 5043",
+    "isCompleted": false
+  },
+  {
+    "tc": "16848806056",
+    "name": "Uçuş İşl. Cem Demir",
+    "plate1": "34 AVN 504",
+    "plate2": "16 AIR 5074",
+    "isCompleted": false
+  },
+  {
+    "tc": "87531975342",
+    "name": "Kpt. Hatice Aslan",
+    "plate1": "07 IST 521",
+    "plate2": "07 PLT 5105",
+    "isCompleted": false
+  },
+  {
+    "tc": "68224044606",
+    "name": "Kpt. Büşra Erdoğan",
+    "plate1": "34 THY 538",
+    "plate2": "06 THY 5136",
+    "isCompleted": false
+  },
+  {
+    "tc": "49917113960",
+    "name": "Kpt. Hasan Yıldız",
+    "plate1": "34 AVN 555",
+    "plate2": "34 VIP 5167",
+    "isCompleted": false
+  },
+  {
+    "tc": "20600282224",
+    "name": "Kpt. Süleyman Koç",
+    "plate1": "07 IST 572",
+    "plate2": "34 ANK 5198",
+    "isCompleted": false
+  },
+  {
+    "tc": "91393351510",
+    "name": "F/O Hakan Güneş",
+    "plate1": "34 THY 589",
+    "plate2": "41 JET 5229",
+    "isCompleted": false
+  },
+  {
+    "tc": "72086420874",
+    "name": "F/O Kemal Aydın",
+    "plate1": "34 AVN 606",
+    "plate2": "35 AER 5260",
+    "isCompleted": false
+  },
+  {
+    "tc": "53779599138",
+    "name": "Uçuş İşl. Elif Şimşek",
+    "plate1": "07 IST 623",
+    "plate2": "34 AVN 5291",
+    "isCompleted": true,
+    "selectedPlate": "34 AVN 5291",
+    "selectionType": "plate2",
+    "submittedAt": "2026-08-30T07:47:56.937Z",
+    "updatedAt": "2026-08-30T07:47:56.937Z",
+    "referenceCode": "TALPA-PLK-37998"
+  },
+  {
+    "tc": "34462668492",
+    "name": "Kpt. Ahmet Yılmaz",
+    "plate1": "34 THY 640",
+    "plate2": "34 FLY 5322",
+    "isCompleted": false
+  },
+  {
+    "tc": "11111111110",
+    "name": "Kpt. Test Kaptan",
+    "plate1": "34 TST 01",
+    "plate2": "34 TST 02",
+    "isCompleted": true,
+    "selectedPlate": "38 DV 058",
+    "selectionType": "new",
+    "submittedAt": "2026-08-30T09:52:18.643Z",
+    "updatedAt": "2026-08-30T09:52:18.643Z",
+    "referenceCode": "TALPA-PLK-56617"
+  }
+]
