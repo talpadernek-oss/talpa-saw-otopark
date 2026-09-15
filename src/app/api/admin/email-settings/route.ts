@@ -4,7 +4,7 @@ import { sendCustomEmail } from '@/lib/email';
 
 export async function GET() {
   try {
-    const settings = getEmailSettings();
+    const settings = await getEmailSettings();
     return NextResponse.json({
       success: true,
       data: settings
@@ -45,7 +45,7 @@ Dernek / Sistem Yönetimi`;
       });
     }
 
-    const currentSettings = getEmailSettings();
+    const currentSettings = await getEmailSettings();
     const newSettings = {
       ...currentSettings,
       adminNotificationEmail: adminNotificationEmail || currentSettings.adminNotificationEmail,
@@ -53,7 +53,7 @@ Dernek / Sistem Yönetimi`;
       adminNotificationTemplate: adminNotificationTemplate || currentSettings.adminNotificationTemplate
     };
 
-    saveEmailSettings(newSettings);
+    await saveEmailSettings(newSettings);
 
     return NextResponse.json({
       success: true,

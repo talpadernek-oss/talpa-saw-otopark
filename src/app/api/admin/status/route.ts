@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateApplicationStatus, getApplications } from '@/lib/storage';
+import { updateApplicationStatus } from '@/lib/storage';
 import { sendCustomEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Eksik parametre.' }, { status: 400 });
     }
 
-    const updated = updateApplicationStatus(id, status, adminNotes);
+    const updated = await updateApplicationStatus(id, status, adminNotes);
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Başvuru bulunamadı.' }, { status: 404 });
     }

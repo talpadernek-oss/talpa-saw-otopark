@@ -37,6 +37,7 @@ export default function AdminPage() {
   // Applications & Stats state
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [persistentStorage, setPersistentStorage] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -84,6 +85,7 @@ export default function AdminPage() {
       if (json.success) {
         setApplications(json.data.applications);
         setStats(json.data.stats);
+        setPersistentStorage(json.data.persistentStorage ?? null);
       }
 
       const settingsRes = await fetch('/api/admin/email-settings');
@@ -362,6 +364,14 @@ Statü: ${selectedApp.status.toUpperCase()}`;
         {/* TAB 1: APPLICATIONS */}
         {activeTab === 'applications' && (
           <div className="space-y-6">
+            {persistentStorage === false && process.env.NODE_ENV === 'production' && (
+              <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-2xl text-xs">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+                <span>
+                  <strong>Kalıcı depo yapılandırılmamış.</strong> Vercel Blob (BLOB_READ_WRITE_TOKEN) tanımlı olmadığı için başvurular yalnızca geçici bellekte tutuluyor ve sunucu yeniden başladığında kaybolabilir. Vercel panelinden bir Blob store bağlayınız.
+                </span>
+              </div>
+            )}
             {/* Stats Cards */}
             {stats && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">

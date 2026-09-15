@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApplications, getAdminStats } from '@/lib/storage';
+import { getApplications, getAdminStats, isPersistentStorageConfigured } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const apps = getApplications();
-    const stats = getAdminStats();
+    const apps = await getApplications();
+    const stats = await getAdminStats(apps);
 
     return NextResponse.json({
       success: true,
       data: {
         applications: apps,
-        stats
+        stats,
+        persistentStorage: isPersistentStorageConfigured()
       }
     }, {
       headers: {

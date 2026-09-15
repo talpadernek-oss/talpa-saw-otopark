@@ -1,14 +1,64 @@
 import fs from 'fs';
 import path from 'path';
+import { put, get, list, del } from '@vercel/blob';
 import { ApplicationRecord, EmailSettings, AdminStats } from '@/types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const APPLICATIONS_FILE = path.join(DATA_DIR, 'applications.json');
 const EMAIL_SETTINGS_FILE = path.join(DATA_DIR, 'email-settings.json');
 
-// Memory fallbacks for serverless environments (Vercel)
+// Vercel Blob (persistent storage on Vercel, where the filesystem is read-only).
+// Enabled automatically when BLOB_READ_WRITE_TOKEN is present; otherwise the
+// local JSON files under /data are used (local development).
+const BLOB_ENABLED = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+const BLOB_APPS_PREFIX = 'saw-otopark/applications/';
+const BLOB_EMAIL_SETTINGS_PATH = 'saw-otopark/email-settings.json';
+const BLOB_READ_CONCURRENCY = 25;
+
+// Memory fallbacks for serverless environments without Blob configured
 let memoryApplications: ApplicationRecord[] = [];
 let memoryEmailSettings: EmailSettings | null = null;
+
+export function isPersistentStorageConfigured(): boolean {
+  return BLOB_ENABLED;
+}
+
+const appBlobPath = (id: string) => `${BLOB_APPS_PREFIX}${id}.json`;
+
+async function blobReadJson<T>(pathname: string): Promise<T | null> {
+  const result = await get(pathname, { access: 'private', useCache: false });
+  if (!result || result.statusCode !== 200 || !result.stream) return null;
+  const text = await new Response(result.stream).text();
+  return JSON.parse(text) as T;
+}
+
+async function blobWriteJson(pathname: string, data: unknown): Promise<void> {
+  await put(pathname, JSON.stringify(data), {
+    access: 'private',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json'
+  });
+}
+
+async function blobListApplications(): Promise<ApplicationRecord[]> {
+  const pathnames: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await list({ prefix: BLOB_APPS_PREFIX, cursor, limit: 1000 });
+    pathnames.push(...page.blobs.map(b => b.pathname));
+    cursor = page.cursor;
+  } while (cursor);
+
+  const apps: ApplicationRecord[] = [];
+  for (let i = 0; i < pathnames.length; i += BLOB_READ_CONCURRENCY) {
+    const chunk = pathnames.slice(i, i + BLOB_READ_CONCURRENCY);
+    const records = await Promise.all(chunk.map(p => blobReadJson<ApplicationRecord>(p).catch(() => null)));
+    apps.push(...records.filter((r): r is ApplicationRecord => Boolean(r)));
+  }
+
+  return apps.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+}
 
 // Initial seed applications
 const SEED_APPLICATIONS: ApplicationRecord[] = [
@@ -109,7 +159,11 @@ function ensureDataDir() {
   }
 }
 
-export function getApplications(): ApplicationRecord[] {
+/* ------------------------------------------------------------------------
+ * Local (file / memory) implementation
+ * ---------------------------------------------------------------------- */
+
+function readApplicationsFromFile(): ApplicationRecord[] {
   try {
     ensureDataDir();
     if (fs.existsSync(APPLICATIONS_FILE)) {
@@ -124,12 +178,12 @@ export function getApplications(): ApplicationRecord[] {
 
   if (memoryApplications.length === 0) {
     memoryApplications = [...SEED_APPLICATIONS];
-    saveApplications(memoryApplications);
+    writeApplicationsToFile(memoryApplications);
   }
   return memoryApplications;
 }
 
-export function saveApplications(apps: ApplicationRecord[]): boolean {
+function writeApplicationsToFile(apps: ApplicationRecord[]): boolean {
   memoryApplications = apps;
   try {
     ensureDataDir();
@@ -141,39 +195,7 @@ export function saveApplications(apps: ApplicationRecord[]): boolean {
   }
 }
 
-export function addApplication(app: Omit<ApplicationRecord, 'id' | 'createdAt' | 'referenceCode' | 'status'>): ApplicationRecord {
-  const apps = getApplications();
-  const randomSuffix = Math.floor(10000 + Math.random() * 90000);
-  const newRecord: ApplicationRecord = {
-    ...app,
-    id: `app-${Date.now()}-${randomSuffix}`,
-    referenceCode: `SAW-2026-${randomSuffix}`,
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
-
-  apps.unshift(newRecord);
-  saveApplications(apps);
-  return newRecord;
-}
-
-export function updateApplicationStatus(id: string, status: 'pending' | 'approved' | 'rejected', adminNotes?: string): ApplicationRecord | null {
-  const apps = getApplications();
-  const index = apps.findIndex(a => a.id === id);
-  if (index === -1) return null;
-
-  apps[index] = {
-    ...apps[index],
-    status,
-    adminNotes: adminNotes ?? apps[index].adminNotes,
-    updatedAt: new Date().toISOString()
-  };
-
-  saveApplications(apps);
-  return apps[index];
-}
-
-export function getEmailSettings(): EmailSettings {
+function readEmailSettingsFromFile(): EmailSettings {
   try {
     ensureDataDir();
     if (fs.existsSync(EMAIL_SETTINGS_FILE)) {
@@ -188,12 +210,12 @@ export function getEmailSettings(): EmailSettings {
 
   if (!memoryEmailSettings) {
     memoryEmailSettings = { ...DEFAULT_EMAIL_SETTINGS };
-    saveEmailSettings(memoryEmailSettings);
+    writeEmailSettingsToFile(memoryEmailSettings);
   }
   return memoryEmailSettings;
 }
 
-export function saveEmailSettings(settings: EmailSettings): boolean {
+function writeEmailSettingsToFile(settings: EmailSettings): boolean {
   memoryEmailSettings = settings;
   try {
     ensureDataDir();
@@ -205,15 +227,112 @@ export function saveEmailSettings(settings: EmailSettings): boolean {
   }
 }
 
-export function getAdminStats(): AdminStats {
-  const apps = getApplications();
+/* ------------------------------------------------------------------------
+ * Public API (Blob when configured, otherwise file / memory)
+ * ---------------------------------------------------------------------- */
+
+export async function getApplications(): Promise<ApplicationRecord[]> {
+  if (BLOB_ENABLED) return blobListApplications();
+  return readApplicationsFromFile();
+}
+
+export async function getApplicationById(id: string): Promise<ApplicationRecord | null> {
+  if (BLOB_ENABLED) return blobReadJson<ApplicationRecord>(appBlobPath(id));
+  return readApplicationsFromFile().find(a => a.id === id) ?? null;
+}
+
+export async function addApplication(app: Omit<ApplicationRecord, 'id' | 'createdAt' | 'referenceCode' | 'status'>): Promise<ApplicationRecord> {
+  const randomSuffix = Math.floor(10000 + Math.random() * 90000);
+  const newRecord: ApplicationRecord = {
+    ...app,
+    id: `app-${Date.now()}-${randomSuffix}`,
+    referenceCode: `SAW-2026-${randomSuffix}`,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  if (BLOB_ENABLED) {
+    await blobWriteJson(appBlobPath(newRecord.id), newRecord);
+    return newRecord;
+  }
+
+  const apps = readApplicationsFromFile();
+  apps.unshift(newRecord);
+  writeApplicationsToFile(apps);
+  return newRecord;
+}
+
+export async function updateApplicationStatus(id: string, status: 'pending' | 'approved' | 'rejected', adminNotes?: string): Promise<ApplicationRecord | null> {
+  if (BLOB_ENABLED) {
+    const existing = await blobReadJson<ApplicationRecord>(appBlobPath(id));
+    if (!existing) return null;
+    const updated: ApplicationRecord = {
+      ...existing,
+      status,
+      adminNotes: adminNotes ?? existing.adminNotes,
+      updatedAt: new Date().toISOString()
+    };
+    await blobWriteJson(appBlobPath(id), updated);
+    return updated;
+  }
+
+  const apps = readApplicationsFromFile();
+  const index = apps.findIndex(a => a.id === id);
+  if (index === -1) return null;
+
+  apps[index] = {
+    ...apps[index],
+    status,
+    adminNotes: adminNotes ?? apps[index].adminNotes,
+    updatedAt: new Date().toISOString()
+  };
+
+  writeApplicationsToFile(apps);
+  return apps[index];
+}
+
+export async function deleteApplication(id: string): Promise<boolean> {
+  if (BLOB_ENABLED) {
+    await del(appBlobPath(id));
+    return true;
+  }
+
+  const apps = readApplicationsFromFile();
+  const remaining = apps.filter(a => a.id !== id);
+  if (remaining.length === apps.length) return false;
+  return writeApplicationsToFile(remaining);
+}
+
+export async function getEmailSettings(): Promise<EmailSettings> {
+  if (BLOB_ENABLED) {
+    try {
+      const stored = await blobReadJson<Partial<EmailSettings>>(BLOB_EMAIL_SETTINGS_PATH);
+      if (stored) return { ...DEFAULT_EMAIL_SETTINGS, ...stored };
+    } catch (e) {
+      console.warn('Could not read email settings from Blob, using defaults:', e);
+    }
+    return { ...DEFAULT_EMAIL_SETTINGS };
+  }
+  return readEmailSettingsFromFile();
+}
+
+export async function saveEmailSettings(settings: EmailSettings): Promise<boolean> {
+  if (BLOB_ENABLED) {
+    await blobWriteJson(BLOB_EMAIL_SETTINGS_PATH, settings);
+    return true;
+  }
+  return writeEmailSettingsToFile(settings);
+}
+
+export async function getAdminStats(apps?: ApplicationRecord[]): Promise<AdminStats> {
+  const records = apps ?? await getApplications();
   return {
-    totalApplications: apps.length,
-    kokpitCount: apps.filter(a => a.role === 'kokpit').length,
-    kabinCount: apps.filter(a => a.role === 'kabin').length,
-    pendingCount: apps.filter(a => a.status === 'pending').length,
-    approvedCount: apps.filter(a => a.status === 'approved').length,
-    rejectedCount: apps.filter(a => a.status === 'rejected').length,
-    talpaMemberCount: apps.filter(a => a.isTalpaMember).length
+    totalApplications: records.length,
+    kokpitCount: records.filter(a => a.role === 'kokpit').length,
+    kabinCount: records.filter(a => a.role === 'kabin').length,
+    pendingCount: records.filter(a => a.status === 'pending').length,
+    approvedCount: records.filter(a => a.status === 'approved').length,
+    rejectedCount: records.filter(a => a.status === 'rejected').length,
+    talpaMemberCount: records.filter(a => a.isTalpaMember).length
   };
 }

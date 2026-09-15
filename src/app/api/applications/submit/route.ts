@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     const formattedPlate = formatPlate(plate);
 
     // Save record
-    const application = addApplication({
+    const application = await addApplication({
       role,
       tc: tc.trim(),
       name: name.trim(),

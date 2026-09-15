@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getAdminStats } from '@/lib/storage';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
-    const stats = getAdminStats();
+    const stats = await getAdminStats();
     return NextResponse.json({
       success: true,
       data: stats,

@@ -68,7 +68,7 @@ function createImageAttachment(dataUrl: string | undefined, filename: string) {
  */
 export async function sendApplicantConfirmationEmail(app: ApplicationRecord): Promise<{ success: boolean; error?: string }> {
   try {
-    const settings = getEmailSettings();
+    const settings = await getEmailSettings();
     const transporter = createTransporter();
     const user = process.env.SMTP_USER || 'talpa@talpa.org';
 
@@ -94,7 +94,7 @@ export async function sendApplicantConfirmationEmail(app: ApplicationRecord): Pr
  */
 export async function sendAdminNotificationEmail(app: ApplicationRecord): Promise<{ success: boolean; error?: string }> {
   try {
-    const settings = getEmailSettings();
+    const settings = await getEmailSettings();
     const recipient = settings.adminNotificationEmail?.includes('@')
       ? settings.adminNotificationEmail
       : (process.env.ADMIN_NOTIFICATION_EMAIL || 'talpa@talpa.org');
@@ -103,14 +103,17 @@ export async function sendAdminNotificationEmail(app: ApplicationRecord): Promis
 
     const subject = replacePlaceholders(settings.adminNotificationTemplate.subject, app);
     const textBody = replacePlaceholders(settings.adminNotificationTemplate.body, app);
-    const ruhsatAttachment = createImageAttachment(app.ruhsatImage, `ruhsat-${app.referenceCode}`);
+    const attachments = [
+      createImageAttachment(app.ruhsatImage, `ruhsat-${app.referenceCode}`),
+      createImageAttachment(app.apronCardImage, `apron-karti-${app.referenceCode}`)
+    ].filter((a): a is NonNullable<typeof a> => Boolean(a));
 
     await transporter.sendMail({
       from: `"TALPA SAW Otopark Portalı" <${user}>`,
       to: recipient,
       subject,
       text: textBody,
-      attachments: ruhsatAttachment ? [ruhsatAttachment] : undefined
+      attachments: attachments.length ? attachments : undefined
     });
 
     return { success: true };
