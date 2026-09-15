@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
 
     const cleanTc = tc.trim();
 
-    // Helper to perform fetch call to TALPA API
-    async function callTalpaApi(url: string, payload: { tcNo: string; campaignSlug?: string }) {
+    // Helper arrow function to perform fetch call to TALPA API
+    const callTalpaApi = async (url: string, payload: { tcNo: string; campaignSlug?: string }) => {
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       });
       const json = await res.json().catch(() => ({ ok: false, reason: 'invalid_json' }));
       return { status: res.status, ok: res.ok, data: json };
-    }
+    };
 
     // Attempt 1: Call Primary API (with campaignSlug if defined)
     const requestPayload: { tcNo: string; campaignSlug?: string } = { tcNo: cleanTc };
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     if (!isMember && data.status === 'degil' && requestedCampaignSlug) {
       console.log('Campaign slug verification returned degil, retrying without campaignSlug...');
       const pureCheckResult = await callTalpaApi(primaryEndpoint, { tcNo: cleanTc }).catch(() => null);
-      if (pureCheckResult && pureCheckResult.httpStatus === 200 && pureCheckResult.data.ok !== false) {
+      if (pureCheckResult && pureCheckResult.status === 200 && pureCheckResult.data.ok !== false) {
         if (pureCheckResult.data.status === 'uye' || pureCheckResult.data.status === 'borclu') {
           isMember = true;
           data.status = pureCheckResult.data.status;
