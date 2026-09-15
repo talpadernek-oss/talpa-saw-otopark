@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import { ApplicationRecord } from '@/types';
 import { getEmailSettings } from '@/lib/storage';
 import { formatTurkishDate } from '@/lib/tckn';
+import { getPaymentSummary } from '@/lib/payment';
 
 function createTransporter() {
   const host = process.env.SMTP_HOST || 'smtp.office365.com';
@@ -30,8 +31,10 @@ function replacePlaceholders(template: string, app: ApplicationRecord): string {
   const formattedDate = formatTurkishDate(app.createdAt);
   const startDateText = app.startDateOption === 'next_month' ? 'Önümüzdeki Ay Başında' : 'Hemen Başlat';
   const monthlyFeeText = `${app.monthlyFee?.toLocaleString('tr-TR') || (app.role === 'kokpit' ? '2.250' : '2.500')} TL / ay`;
+  const paymentInfo = getPaymentSummary(app);
 
   return template
+    .replace(/\{\{PAYMENT_INFO\}\}/g, paymentInfo)
     .replace(/\{\{NAME\}\}/g, app.name || '')
     .replace(/\{\{PLATE\}\}/g, app.plate || '')
     .replace(/\{\{REF_CODE\}\}/g, app.referenceCode || '')
@@ -92,7 +95,9 @@ export async function sendApplicantConfirmationEmail(app: ApplicationRecord): Pr
 export async function sendAdminNotificationEmail(app: ApplicationRecord): Promise<{ success: boolean; error?: string }> {
   try {
     const settings = getEmailSettings();
-    const recipient = 'talpa@talpa.org';
+    const recipient = settings.adminNotificationEmail?.includes('@')
+      ? settings.adminNotificationEmail
+      : (process.env.ADMIN_NOTIFICATION_EMAIL || 'talpa@talpa.org');
     const transporter = createTransporter();
     const user = process.env.SMTP_USER || 'talpa@talpa.org';
 

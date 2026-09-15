@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { ApplicationRecord, AdminStats, EmailSettings } from '@/types';
 import { formatTurkishDate } from '@/lib/tckn';
+import { getPaymentSummary } from '@/lib/payment';
 
 export default function AdminPage() {
   // Login auth state
@@ -139,6 +140,9 @@ T.C. Kimlik No: ${selectedApp.tc}
 E-posta: ${selectedApp.email}
 Telefon: ${selectedApp.phone}
 Plaka: ${selectedApp.plate}
+Abonelik Başlangıcı: ${selectedApp.startDateOption === 'next_month' ? 'Önümüzdeki Ay Başında' : 'Hemen Başlat'}
+Aylık Ücret: ${selectedApp.monthlyFee.toLocaleString('tr-TR')} TL
+Ödeme Bilgisi: ${getPaymentSummary(selectedApp)}
 TALPA Üyeliği: ${selectedApp.isTalpaMember ? 'Doğrulanmış Üye' : 'Üye Değil'}
 Tarih: ${formatTurkishDate(selectedApp.createdAt)}
 Statü: ${selectedApp.status.toUpperCase()}`;
@@ -759,6 +763,12 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                   <span className="text-slate-400 block font-semibold">Aylık Ücret</span>
                   <strong className="text-slate-900 font-bold">
                     {selectedApp.monthlyFee.toLocaleString('tr-TR')} TL
+                  </strong>
+                </div>
+                <div className="col-span-2 sm:col-span-3">
+                  <span className="text-slate-400 block font-semibold">Ödeme Bilgisi</span>
+                  <strong className="text-slate-900 font-mono font-bold">
+                    {getPaymentSummary(selectedApp)}
                   </strong>
                 </div>
               </div>

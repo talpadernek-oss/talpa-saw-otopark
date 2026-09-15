@@ -90,6 +90,7 @@ Telefon: {{PHONE}}
 Plaka: {{PLATE}}
 Abonelik Başlangıcı: {{START_DATE}}
 Aylık Ücret: {{MONTHLY_FEE}}
+Ödeme Bilgisi: {{PAYMENT_INFO}}
 TALPA Üyeliği: {{TALPA_STATUS}}
 Referans Kodu: {{REF_CODE}}
 Tarih: {{DATE}}

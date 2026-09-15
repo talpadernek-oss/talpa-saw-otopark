@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   UserCheck,
   Plane,
@@ -65,6 +65,16 @@ export default function ApplicationFormPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [submittedApp, setSubmittedApp] = useState<ApplicationRecord | null>(null);
+
+  // Clear a stale validation error as soon as the user changes any form field
+  useEffect(() => {
+    setFormError('');
+  }, [
+    name, tc, email, phone, plate, plateConfirmed, startDateOption,
+    paymentConsentAccepted, paymentCardNumber, paymentCardholderName,
+    paymentExpiryMonth, paymentExpiryYear, paymentCvv,
+    ruhsatImage, apronCardImage, kvkkAccepted, explicitConsentAccepted
+  ]);
 
   // Step 1: Select Role
   const handleSelectRole = (selectedRole: RoleType) => {
@@ -680,7 +690,7 @@ export default function ApplicationFormPage() {
                     <input
                       type="text"
                       value={paymentCardholderName}
-                      onChange={(e) => setPaymentCardholderName(e.target.value.toUpperCase())}
+                      onChange={(e) => setPaymentCardholderName(e.target.value.toLocaleUpperCase('tr-TR'))}
                       placeholder="AD SOYAD"
                       className="w-full h-11 px-3.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-talpa-gold-400 focus:outline-none"
                       required

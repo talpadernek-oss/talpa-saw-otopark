@@ -10,6 +10,6 @@
   },
   "adminNotificationTemplate": {
     "subject": "Yeni SAW Otopark Ek Kontenjan Başvurusu - {{NAME}} ({{PLATE}})",
-    "body": "Sistemde Yeni Bir SAW Otopark Ek Kontenjan Başvurusu Oluşturuldu:\n\nBaşvuran Bilgileri:\n-----------------------------\nAd Soyad: {{NAME}}\nGörevi: {{ROLE_TITLE}}\nT.C. Kimlik No: {{TC}}\nE-posta: {{EMAIL}}\nTelefon: {{PHONE}}\nPlaka: {{PLATE}}\nAbonelik Başlangıcı: {{START_DATE}}\nAylık Ücret: {{MONTHLY_FEE}}\nTALPA Üyeliği: {{TALPA_STATUS}}\nReferans Kodu: {{REF_CODE}}\nTarih: {{DATE}}\n\nYönetim panelinden başvuruyu inceleyebilirsiniz."
+    "body": "Sistemde Yeni Bir SAW Otopark Ek Kontenjan Başvurusu Oluşturuldu:\n\nBaşvuran Bilgileri:\n-----------------------------\nAd Soyad: {{NAME}}\nGörevi: {{ROLE_TITLE}}\nT.C. Kimlik No: {{TC}}\nE-posta: {{EMAIL}}\nTelefon: {{PHONE}}\nPlaka: {{PLATE}}\nAbonelik Başlangıcı: {{START_DATE}}\nAylık Ücret: {{MONTHLY_FEE}}\nÖdeme Bilgisi: {{PAYMENT_INFO}}\nTALPA Üyeliği: {{TALPA_STATUS}}\nReferans Kodu: {{REF_CODE}}\nTarih: {{DATE}}\n\nYönetim panelinden başvuruyu inceleyebilirsiniz."
   }
 }
