@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { CreditCard, UploadCloud, X, CheckCircle2 } from 'lucide-react';
+import { compressImage } from '@/lib/compressImage';
 
 interface ApronUploadFrameProps {
   value?: string;
@@ -18,19 +19,17 @@ export default function ApronUploadFrame({ value, onChange, label = 'Apron Kart 
     }
   };
 
-  const processFile = (file: File) => {
+  const processFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('Lütfen bir görsel dosyası (JPG, PNG vb.) seçiniz.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        onChange(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      onChange(await compressImage(file));
+    } catch {
+      alert('Görsel sıkıştırılamadı. Lütfen farklı bir görsel seçiniz.');
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
