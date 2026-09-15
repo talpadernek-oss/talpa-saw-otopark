@@ -86,22 +86,29 @@ export default function ApplicationFormPage() {
       const res = await fetch('/api/talpa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tc: verifyTc })
+        body: JSON.stringify({ tcNo: verifyTc })
       });
 
       const json = await res.json();
       setVerifying(false);
 
+      if (!res.ok || json.success === false || json.ok === false) {
+        setIsTalpaMember(null);
+        setVerifyError(json.error || 'TALPA üyelik doğrulaması yapılamadı. Lütfen daha sonra tekrar deneyiniz.');
+        return;
+      }
+
       if (json.isMember) {
         setIsTalpaMember(true);
-        setTc(verifyTc); // Pre-fill TC in main form
-        setStep(3); // Proceed to form
+        setTc(verifyTc);
+        setStep(3);
       } else {
         setIsTalpaMember(false);
         setTalpaRedirectUrl(json.redirectUrl || 'https://www.talpa.org/uyelik/');
       }
     } catch (err) {
       setVerifying(false);
+      setIsTalpaMember(null);
       setVerifyError('Sorgulama yapılırken bağlantı hatası oluştu. Lütfen tekrar deneyiniz.');
     }
   };

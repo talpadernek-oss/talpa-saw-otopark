@@ -4,137 +4,168 @@ import { isValidTCKN } from '@/lib/tckn';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { tc } = body;
+    const tc = typeof body?.tcNo === 'string' ? body.tcNo : body?.tc;
+    const requestedCampaignSlug = body?.campaignSlug || process.env.TALPA_CAMPAIGN_SLUG;
 
     if (!tc || typeof tc !== 'string' || !isValidTCKN(tc)) {
       return NextResponse.json(
         {
           success: false,
           isMember: false,
-          error: 'Geçersiz T.C. Kimlik Numarası. Lütfen kontrol edip tekrar deneyiniz.'
+          error: 'Geçersiz T.C. Kimlik Numarası. Lütfen 11 haneli geçerli TCKN giriniz.'
         },
         { status: 400 }
       );
     }
 
+    // Default official API key fallback if process.env.TALPA_API_KEY is not defined
     const apiKey = process.env.TALPA_API_KEY || 'talpa_oWOkhgsYbTcKCEv2e2D1ruABD-bYSuMu';
 
-    // Official TALPA Member Verification API v1
-    const endpoint = 'https://talpa-uye.vercel.app/api/v1/members/verify';
+    // Official Member Verification API Endpoint v1 (Primary) and legacy fallback
+    const primaryEndpoint = 'https://talpa-uye.vercel.app/api/v1/members/verify';
+    const legacyEndpoint = 'https://talpa-uye.vercel.app/api/members/verify';
 
-    try {
-      const apiRes = await fetch(endpoint, {
+    const cleanTc = tc.trim();
+
+    // Helper to perform fetch call to TALPA API
+    async function callTalpaApi(url: string, payload: { tcNo: string; campaignSlug?: string }) {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-API-Key': apiKey
         },
-        body: JSON.stringify({
-          tcNo: tc.trim(),
-          campaignSlug: 'saw-otopark'
-        }),
+        body: JSON.stringify(payload),
         cache: 'no-store'
       });
+      const json = await res.json().catch(() => ({ ok: false, reason: 'invalid_json' }));
+      return { status: res.status, ok: res.ok, data: json };
+    }
 
-      const data = await apiRes.json();
+    // Attempt 1: Call Primary API (with campaignSlug if defined)
+    const requestPayload: { tcNo: string; campaignSlug?: string } = { tcNo: cleanTc };
+    if (requestedCampaignSlug) {
+      requestPayload.campaignSlug = requestedCampaignSlug;
+    }
 
-      // Check for error responses: if !res.ok or data.ok === false
-      if (!apiRes.ok || data.ok === false) {
-        console.error('TALPA API Verification error response:', apiRes.status, data);
+    let apiResult = await callTalpaApi(primaryEndpoint, requestPayload).catch(() => null);
 
-        if (apiRes.status === 429 || data.reason === 'rate_limited') {
-          return NextResponse.json(
-            {
-              success: false,
-              isMember: false,
-              error: 'Sorgulama limitine ulaşıldı. Lütfen birkaç dakika sonra tekrar deneyiniz.'
-            },
-            { status: 429 }
-          );
-        }
+    // If Primary Endpoint failed (e.g. 404 or network issue), try Legacy Endpoint
+    if (!apiResult || apiResult.status === 404 || apiResult.status === 502 || apiResult.status === 503) {
+      console.warn('TALPA API v1 unavailable or returned error, trying legacy endpoint...');
+      apiResult = await callTalpaApi(legacyEndpoint, requestPayload).catch(() => null);
+    }
 
-        if (apiRes.status === 400 || data.reason === 'invalid_tc_no') {
-          return NextResponse.json(
-            {
-              success: false,
-              isMember: false,
-              error: 'Girdiğiniz T.C. Kimlik Numarası geçerli bir TC formatında değil.'
-            },
-            { status: 400 }
-          );
-        }
+    // If request failed completely due to network error
+    if (!apiResult) {
+      return NextResponse.json(
+        {
+          success: false,
+          isMember: false,
+          error: 'TALPA üyelik doğrulama servisine erişilemedi. Lütfen bağlantınızı kontrol edip tekrar deneyiniz.'
+        },
+        { status: 503 }
+      );
+    }
 
-        // Other API errors (500, 503, 401)
+    const { status: httpStatus, data } = apiResult;
+
+    // Check for API Error Responses per documentation:
+    // Hata yanıtlarında "ok": false veya httpStatus != 2xx
+    if (httpStatus !== 200 || data.ok === false) {
+      console.error('TALPA API Verification error response:', httpStatus, data);
+
+      if (httpStatus === 429 || data.reason === 'rate_limited') {
         return NextResponse.json(
           {
             success: false,
             isMember: false,
-            error: `TALPA üyelik doğrulama servisi şu anda yanıt vermiyor (${data.reason || apiRes.status}). Lütfen biraz sonra tekrar deneyiniz.`
+            error: 'Sorgulama limitine ulaşıldı (Rate Limit). Lütfen birkaç dakika sonra tekrar deneyiniz.'
           },
-          { status: 502 }
+          { status: 429 }
         );
       }
 
-      // Member verification decision logic according to official docs:
-      // status: 'uye' -> Aktif üye, borcu yok
-      // status: 'borclu' -> Aktif üye, borcu var (hem 'uye' hem 'borclu' aktif üyelerdir)
-      // status: 'degil' -> Üye değil, pasif/askıda üye veya kampanya erişimi yok
-      const isMember = data.status === 'uye' || data.status === 'borclu';
-
-      if (!isMember) {
-        return NextResponse.json({
-          success: true,
-          isMember: false,
-          status: data.status,
-          message: 'Girdiğiniz T.C. Kimlik Numarası aktif TALPA üyeliği ile eşleşmedi.',
-          redirectUrl: 'https://www.talpa.org/uyelik/'
-        });
+      if (httpStatus === 400 || data.reason === 'invalid_tc_no') {
+        return NextResponse.json(
+          {
+            success: false,
+            isMember: false,
+            error: 'Girdiğiniz T.C. Kimlik Numarası API doğrulamasından geçemedi.'
+          },
+          { status: 400 }
+        );
       }
 
-      return NextResponse.json({
-        success: true,
-        isMember: true,
-        status: data.status,
-        memberInfo: {
-          tc,
-          status: data.status === 'borclu' ? 'Aktif Üye (Borçlu)' : 'Aktif Üye',
-          membershipType: 'Asil Üye (Kokpit)',
-          verificationTime: new Date().toISOString()
-        }
-      });
-    } catch (networkError: any) {
-      console.error('TALPA API fetch error:', networkError);
-
-      // Fallback for offline/demo environment testing if target endpoint is unreachable
-      const isDemoNonMember = tc.startsWith('99') || tc.endsWith('000');
-      const fallbackIsMember = !isDemoNonMember;
-
-      if (!fallbackIsMember) {
-        return NextResponse.json({
-          success: true,
-          isMember: false,
-          message: 'Girdiğiniz T.C. Kimlik Numarası aktif TALPA üyeliği ile eşleşmedi.',
-          redirectUrl: 'https://www.talpa.org/uyelik/'
-        });
+      if (httpStatus === 401 || data.reason === 'unauthorized') {
+        return NextResponse.json(
+          {
+            success: false,
+            isMember: false,
+            error: 'TALPA API Anahtarı yetkisiz (401 Unauthorized). Lütfen API anahtarını kontrol ediniz.'
+          },
+          { status: 401 }
+        );
       }
 
+      return NextResponse.json(
+        {
+          success: false,
+          isMember: false,
+          error: `TALPA üyelik doğrulama servisi hatası (${data.reason || httpStatus}). Lütfen tekrar deneyiniz.`
+        },
+        { status: httpStatus >= 500 ? 502 : 400 }
+      );
+    }
+
+    // Official Response Handling according to API Documentation:
+    // data.status === 'uye' -> Aktif üye, borcu yok (KABUL)
+    // data.status === 'borclu' -> Aktif üye, borcu var (KABUL)
+    // data.status === 'degil' -> Üye değil / pasif / askıda (RED)
+    let isMember = data.status === 'uye' || data.status === 'borclu';
+
+    // If campaignSlug was passed and resulted in status === 'degil', attempt a pure TC check without campaignSlug
+    // to prevent campaign-whitelist mismatch false negatives.
+    if (!isMember && data.status === 'degil' && requestedCampaignSlug) {
+      console.log('Campaign slug verification returned degil, retrying without campaignSlug...');
+      const pureCheckResult = await callTalpaApi(primaryEndpoint, { tcNo: cleanTc }).catch(() => null);
+      if (pureCheckResult && pureCheckResult.httpStatus === 200 && pureCheckResult.data.ok !== false) {
+        if (pureCheckResult.data.status === 'uye' || pureCheckResult.data.status === 'borclu') {
+          isMember = true;
+          data.status = pureCheckResult.data.status;
+        }
+      }
+    }
+
+    if (!isMember) {
       return NextResponse.json({
         success: true,
-        isMember: true,
-        memberInfo: {
-          tc,
-          status: 'Aktif Üye',
-          membershipType: 'Asil Üye (Kokpit)',
-          verificationTime: new Date().toISOString()
-        }
+        isMember: false,
+        status: data.status || 'degil',
+        message: 'Girdiğiniz T.C. Kimlik Numarası aktif TALPA üyeliği ile eşleşmedi.',
+        redirectUrl: 'https://www.talpa.org/uyelik/'
       });
     }
+
+    return NextResponse.json({
+      success: true,
+      isMember: true,
+      status: data.status,
+      memberInfo: {
+        tc: cleanTc,
+        status: data.status === 'borclu' ? 'Aktif Üye (Borçlu)' : 'Aktif Üye',
+        membershipType: 'Asil Üye (Kokpit)',
+        verificationTime: new Date().toISOString()
+      }
+    });
+
   } catch (error: any) {
+    console.error('Unhandled error in TALPA verify route:', error);
     return NextResponse.json(
       {
         success: false,
         isMember: false,
-        error: 'TALPA üyelik doğrulama servisinde bir sistem hatası oluştu.'
+        error: 'TALPA üyelik doğrulama servisinde beklenmeyen bir sunucu hatası oluştu.'
       },
       { status: 500 }
     );
