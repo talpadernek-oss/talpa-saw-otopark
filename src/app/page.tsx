@@ -209,7 +209,13 @@ export default function ApplicationFormPage() {
         })
       });
 
-      const json = await res.json();
+      const responseText = await res.text();
+      let json: { success?: boolean; data?: ApplicationRecord; error?: string };
+      try {
+        json = JSON.parse(responseText);
+      } catch {
+        throw new Error(`Sunucu geçersiz yanıt verdi (HTTP ${res.status}).`);
+      }
       setSubmitting(false);
 
       if (!res.ok || !json.success) {
@@ -217,11 +223,16 @@ export default function ApplicationFormPage() {
         return;
       }
 
+      if (!json.data) {
+        setFormError('Sunucu başvuruyu kaydetti ancak başvuru detayını döndüremedi.');
+        return;
+      }
+
       setSubmittedApp(json.data);
       setStep(4); // Success screen
     } catch (err) {
       setSubmitting(false);
-      setFormError('Sunucu bağlantı hatası oluştu.');
+      setFormError(err instanceof Error ? err.message : 'Başvuru gönderilirken beklenmeyen bir hata oluştu.');
     }
   };
 

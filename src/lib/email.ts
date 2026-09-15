@@ -46,6 +46,20 @@ function replacePlaceholders(template: string, app: ApplicationRecord): string {
     .replace(/\{\{DATE\}\}/g, formattedDate);
 }
 
+function createImageAttachment(dataUrl: string | undefined, filename: string) {
+  if (!dataUrl?.startsWith('data:image/')) return undefined;
+
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+  if (!match) return undefined;
+
+  const extension = match[1].split('/')[1].replace('jpeg', 'jpg');
+  return {
+    filename: `${filename}.${extension}`,
+    content: Buffer.from(match[2], 'base64'),
+    contentType: match[1]
+  };
+}
+
 /**
  * Send confirmation email to applicant
  */
@@ -78,18 +92,20 @@ export async function sendApplicantConfirmationEmail(app: ApplicationRecord): Pr
 export async function sendAdminNotificationEmail(app: ApplicationRecord): Promise<{ success: boolean; error?: string }> {
   try {
     const settings = getEmailSettings();
-    const recipient = settings.adminNotificationEmail || process.env.ADMIN_NOTIFICATION_EMAIL || 'talpa@talpa.org';
+    const recipient = 'talpa@talpa.org';
     const transporter = createTransporter();
     const user = process.env.SMTP_USER || 'talpa@talpa.org';
 
     const subject = replacePlaceholders(settings.adminNotificationTemplate.subject, app);
     const textBody = replacePlaceholders(settings.adminNotificationTemplate.body, app);
+    const ruhsatAttachment = createImageAttachment(app.ruhsatImage, `ruhsat-${app.referenceCode}`);
 
     await transporter.sendMail({
       from: `"TALPA SAW Otopark Portalı" <${user}>`,
       to: recipient,
       subject,
-      text: textBody
+      text: textBody,
+      attachments: ruhsatAttachment ? [ruhsatAttachment] : undefined
     });
 
     return { success: true };

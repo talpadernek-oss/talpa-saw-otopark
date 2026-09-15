@@ -78,7 +78,7 @@ export default function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/applications');
+      const res = await fetch('/api/admin/applications?refresh=1', { cache: 'no-store' });
       const json = await res.json();
       if (json.success) {
         setApplications(json.data.applications);
