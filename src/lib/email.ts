@@ -4,6 +4,9 @@ import { getEmailSettings } from '@/lib/storage';
 import { formatTurkishDate } from '@/lib/tckn';
 import { getPaymentSummary } from '@/lib/payment';
 
+// Mailbox that receives every new application (with document attachments).
+export const PRIMARY_ADMIN_NOTIFICATION_EMAIL = 'talpa@talpa.org';
+
 function createTransporter() {
   const host = process.env.SMTP_HOST || 'smtp.office365.com';
   const port = Number(process.env.SMTP_PORT) || 587;
@@ -95,9 +98,13 @@ export async function sendApplicantConfirmationEmail(app: ApplicationRecord): Pr
 export async function sendAdminNotificationEmail(app: ApplicationRecord): Promise<{ success: boolean; error?: string }> {
   try {
     const settings = await getEmailSettings();
-    const recipient = settings.adminNotificationEmail?.includes('@')
-      ? settings.adminNotificationEmail
-      : (process.env.ADMIN_NOTIFICATION_EMAIL || 'talpa@talpa.org');
+    // Every application is always delivered to the primary TALPA mailbox;
+    // an additional address configured in the admin panel is added as a recipient.
+    const recipients = Array.from(new Set(
+      [PRIMARY_ADMIN_NOTIFICATION_EMAIL, settings.adminNotificationEmail]
+        .map(addr => (addr || '').trim().toLowerCase())
+        .filter(addr => addr.includes('@'))
+    ));
     const transporter = createTransporter();
     const user = process.env.SMTP_USER || 'talpa@talpa.org';
 
@@ -110,7 +117,7 @@ export async function sendAdminNotificationEmail(app: ApplicationRecord): Promis
 
     await transporter.sendMail({
       from: `"TALPA SAW Otopark Portalı" <${user}>`,
-      to: recipient,
+      to: recipients,
       subject,
       text: textBody,
       attachments: attachments.length ? attachments : undefined

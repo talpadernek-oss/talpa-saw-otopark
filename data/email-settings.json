@@ -1,5 +1,5 @@
 {
-  "adminNotificationEmail": "otopark@talpa.org",
+  "adminNotificationEmail": "talpa@talpa.org",
   "smtpHost": "smtp.office365.com",
   "smtpPort": 587,
   "smtpUser": "talpa@talpa.org",

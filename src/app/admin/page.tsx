@@ -562,7 +562,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
             <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                 <Mail className="w-4 h-4 text-talpa-gold-600" />
-                <span>Bildirimlerin Gönderileceği Yönetici E-posta Adresi</span>
+                <span>Ek Bildirim Alıcısı (Yönetici E-posta Adresi)</span>
               </h3>
 
               <div>
@@ -570,12 +570,12 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                   type="email"
                   value={emailSettings.adminNotificationEmail}
                   onChange={(e) => setEmailSettings({ ...emailSettings, adminNotificationEmail: e.target.value })}
-                  placeholder="ör. otopark@talpa.org"
+                  placeholder="ör. talpa@talpa.org"
                   className="w-full h-11 px-4 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-talpa-gold-400"
                   required
                 />
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Yeni başvuru yapıldığında otomatik bildirim maili bu adrese gönderilecektir.
+                  Her yeni başvuru, belge görselleri ekli olarak her zaman <strong>talpa@talpa.org</strong> adresine gönderilir. Buraya farklı bir adres yazarsanız bildirim o adrese de iletilir.
                 </p>
               </div>
 
