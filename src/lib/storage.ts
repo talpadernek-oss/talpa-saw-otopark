@@ -21,6 +21,8 @@ const SEED_APPLICATIONS: ApplicationRecord[] = [
     email: 'mehmet.yilmaz@pilot.org',
     phone: '0532 111 2233',
     plate: '34 THY 1933',
+    startDateOption: 'next_month',
+    monthlyFee: 2250,
     kvkkAccepted: true,
     explicitConsentAccepted: true,
     isTalpaMember: true,
@@ -37,6 +39,8 @@ const SEED_APPLICATIONS: ApplicationRecord[] = [
     email: 'ayse.kaya@airline.com',
     phone: '0555 999 8877',
     plate: '06 KPT 404',
+    startDateOption: 'immediate',
+    monthlyFee: 2500,
     kvkkAccepted: true,
     explicitConsentAccepted: true,
     isTalpaMember: false,
@@ -62,6 +66,8 @@ Başvuru Detaylarınız:
 Referans Kodu: {{REF_CODE}}
 Başvuru Türü: {{ROLE_TITLE}}
 Plaka: {{PLATE}}
+Başlangıç Tercihi: {{START_DATE}}
+Aylık Ücret: {{MONTHLY_FEE}}
 T.C. Kimlik No: {{TC}}
 Tarih: {{DATE}}
 
@@ -82,6 +88,8 @@ T.C. Kimlik No: {{TC}}
 E-posta: {{EMAIL}}
 Telefon: {{PHONE}}
 Plaka: {{PLATE}}
+Abonelik Başlangıcı: {{START_DATE}}
+Aylık Ücret: {{MONTHLY_FEE}}
 TALPA Üyeliği: {{TALPA_STATUS}}
 Referans Kodu: {{REF_CODE}}
 Tarih: {{DATE}}

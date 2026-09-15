@@ -1,0 +1,15 @@
+{
+  "adminNotificationEmail": "otopark@talpa.org",
+  "smtpHost": "smtp.office365.com",
+  "smtpPort": 587,
+  "smtpUser": "talpa@talpa.org",
+  "smtpPassConfigured": true,
+  "applicantConfirmationTemplate": {
+    "subject": "SAW Otopark Ek Kontenjan Başvurunuz Alındı - {{REF_CODE}}",
+    "body": "Sayın {{NAME}},\n\nSabiha Gökçen Havalimanı (SAW) otopark ek kontenjan başvurunuz başarıyla alınmıştır.\n\nBaşvuru Detaylarınız:\n-----------------------------\nReferans Kodu: {{REF_CODE}}\nBaşvuru Türü: {{ROLE_TITLE}}\nPlaka: {{PLATE}}\nBaşlangıç Tercihi: {{START_DATE}}\nAylık Ücret: {{MONTHLY_FEE}}\nT.C. Kimlik No: {{TC}}\nTarih: {{DATE}}\n\nBaşvurunuz yetkililer tarafından incelenecek ve durum güncellendiğinde tarafınıza e-posta ile bilgi verilecektir.\n\nSaygılarımızla,\nTürkiye Havayolu Pilotları Derneği (TALPA)"
+  },
+  "adminNotificationTemplate": {
+    "subject": "Yeni SAW Otopark Ek Kontenjan Başvurusu - {{NAME}} ({{PLATE}})",
+    "body": "Sistemde Yeni Bir SAW Otopark Ek Kontenjan Başvurusu Oluşturuldu:\n\nBaşvuran Bilgileri:\n-----------------------------\nAd Soyad: {{NAME}}\nGörevi: {{ROLE_TITLE}}\nT.C. Kimlik No: {{TC}}\nE-posta: {{EMAIL}}\nTelefon: {{PHONE}}\nPlaka: {{PLATE}}\nAbonelik Başlangıcı: {{START_DATE}}\nAylık Ücret: {{MONTHLY_FEE}}\nTALPA Üyeliği: {{TALPA_STATUS}}\nReferans Kodu: {{REF_CODE}}\nTarih: {{DATE}}\n\nYönetim panelinden başvuruyu inceleyebilirsiniz."
+  }
+}

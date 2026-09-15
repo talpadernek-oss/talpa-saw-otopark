@@ -2,6 +2,8 @@ export type RoleType = 'kokpit' | 'kabin';
 
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 
+export type StartDateOption = 'next_month' | 'immediate';
+
 export interface ApplicationRecord {
   id: string;
   referenceCode: string;
@@ -11,6 +13,13 @@ export interface ApplicationRecord {
   email: string;
   phone: string;
   plate: string;
+  startDateOption: StartDateOption;
+  monthlyFee: number; // 2250 TL for Kokpit/TALPA, 2500 TL for Kabin
+  paymentCardLast4?: string;
+  paymentCardholderName?: string;
+  paymentExpiryMonth?: string;
+  paymentExpiryYear?: string;
+  paymentConsentAccepted?: boolean;
   ruhsatImage?: string; // base64 or path
   apronCardImage?: string; // base64 or path
   kvkkAccepted: boolean;
@@ -34,7 +43,7 @@ export interface AdminStats {
 
 export interface EmailTemplate {
   subject: string;
-  body: string; // Plain text or HTML template with variables like {{NAME}}, {{PLATE}}, {{REF_CODE}}, {{ROLE}}, etc.
+  body: string;
 }
 
 export interface EmailSettings {
@@ -44,7 +53,7 @@ export interface EmailSettings {
   smtpHost: string;
   smtpPort: number;
   smtpUser: string;
-  smtpPassConfigured: boolean; // boolean flag for UI representation
+  smtpPassConfigured: boolean;
 }
 
 export interface ApiResponse<T = any> {

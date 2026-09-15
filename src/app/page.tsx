@@ -19,9 +19,10 @@ import {
 import TRPlateVisual from '@/components/TRPlateVisual';
 import RuhsatUploadFrame from '@/components/RuhsatUploadFrame';
 import ApronUploadFrame from '@/components/ApronUploadFrame';
+import PaymentCardVisual from '@/components/PaymentCardVisual';
 import ConsentModal from '@/components/ConsentModal';
 import { isValidTCKN, formatPlate } from '@/lib/tckn';
-import { RoleType, ApplicationRecord } from '@/types';
+import { RoleType, StartDateOption, ApplicationRecord } from '@/types';
 
 export default function ApplicationFormPage() {
   // Step state: 1 = Role Selection, 2 = TALPA Verification (if kokpit), 3 = Main Form, 4 = Success Result
@@ -42,6 +43,14 @@ export default function ApplicationFormPage() {
   const [phone, setPhone] = useState('');
   const [plate, setPlate] = useState('');
   const [plateConfirmed, setPlateConfirmed] = useState(false);
+  const [startDateOption, setStartDateOption] = useState<StartDateOption | ''>('');
+  const [paymentConsentAccepted, setPaymentConsentAccepted] = useState(false);
+  const [paymentCardNumber, setPaymentCardNumber] = useState('');
+  const [paymentCardholderName, setPaymentCardholderName] = useState('');
+  const [paymentExpiryMonth, setPaymentExpiryMonth] = useState('');
+  const [paymentExpiryYear, setPaymentExpiryYear] = useState('');
+  const [paymentCvv, setPaymentCvv] = useState('');
+  const [paymentError, setPaymentError] = useState('');
   const [ruhsatImage, setRuhsatImage] = useState('');
   const [apronCardImage, setApronCardImage] = useState('');
 
@@ -141,6 +150,23 @@ export default function ApplicationFormPage() {
       setFormError('Lütfen plaka bilginizi ekranda yeniden onaylayınız.');
       return;
     }
+    if (!startDateOption) {
+      setFormError('Lütfen aboneliğin başlatılmasını istediğiniz tarihi seçiniz.');
+      return;
+    }
+    if (role === 'kokpit' && !paymentConsentAccepted) {
+      setFormError('Lütfen aylık abonman bedelinin TALPA\'ya kayıtlı kartınızdan alınmasını onaylayınız.');
+      return;
+    }
+    if (role === 'kabin') {
+      const currentMonth = new Date();
+      const expiryDate = new Date(2000 + Number(paymentExpiryYear), Number(paymentExpiryMonth), 0);
+      currentMonth.setDate(1);
+      if (paymentCardNumber.length !== 16 || !paymentCardholderName.trim() || !/^\d{2}$/.test(paymentExpiryMonth) || !/^(0[1-9]|1[0-2])$/.test(paymentExpiryMonth) || !/^\d{2}$/.test(paymentExpiryYear) || !/^\d{3}$/.test(paymentCvv) || expiryDate < currentMonth) {
+        setFormError('Lütfen geçerli ödeme kartı bilgilerini eksiksiz giriniz.');
+        return;
+      }
+    }
     if (!ruhsatImage) {
       setFormError('Lütfen dikdörtgen ruhsat çerçevesine araç ruhsat görselini yükleyiniz.');
       return;
@@ -168,6 +194,13 @@ export default function ApplicationFormPage() {
           email,
           phone,
           plate: formatPlate(plate),
+          startDateOption,
+          paymentConsentAccepted,
+          paymentCardNumber,
+          paymentCardholderName,
+          paymentExpiryMonth,
+          paymentExpiryYear,
+          paymentCvv,
           ruhsatImage,
           apronCardImage,
           kvkkAccepted,
@@ -246,6 +279,7 @@ export default function ApplicationFormPage() {
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                       Kaptan & İkinci Pilotlar. TALPA üyeliği doğrulanarak işleme devam edilir.
                     </p>
+                    <p className="text-sm font-bold text-talpa-navy-900 mt-3">Aylık ücret: 2.250 TL</p>
                   </div>
                 </div>
                 <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-talpa-navy-900 group-hover:text-talpa-gold-600">
@@ -271,6 +305,7 @@ export default function ApplicationFormPage() {
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                       Kabin Ekibi Üyeleri. Doğrudan ek kontenjan başvuru formuna geçebilirsiniz.
                     </p>
+                    <p className="text-sm font-bold text-talpa-navy-900 mt-3">Aylık ücret: 2.500 TL</p>
                   </div>
                 </div>
                 <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-talpa-navy-900 group-hover:text-talpa-navy-700">
@@ -545,9 +580,46 @@ export default function ApplicationFormPage() {
             </div>
 
             {/* Document Upload Area */}
+            {/* Subscription Start Date */}
             <div className="space-y-4 pt-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-1">
-                3. Belge Yükleme (Ruhsat & Apron Kartı)
+                3. Abonelik Başlangıcı
+              </h3>
+              <div>
+                <p className="text-xs font-bold text-slate-800 mb-2">
+                  Otopark aboneliğinin başlatılmasını istediğiniz tarihi seçiniz <span className="text-red-500">*</span>
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${startDateOption === 'next_month' ? 'border-talpa-gold-500 bg-amber-50' : 'border-slate-300 bg-slate-50'}`}>
+                    <input
+                      type="radio"
+                      name="startDateOption"
+                      value="next_month"
+                      checked={startDateOption === 'next_month'}
+                      onChange={() => setStartDateOption('next_month')}
+                      className="w-4 h-4 accent-talpa-gold-600"
+                    />
+                    <span className="text-sm font-semibold text-slate-800">Önümüzdeki ay başında</span>
+                  </label>
+                  <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${startDateOption === 'immediate' ? 'border-talpa-gold-500 bg-amber-50' : 'border-slate-300 bg-slate-50'}`}>
+                    <input
+                      type="radio"
+                      name="startDateOption"
+                      value="immediate"
+                      checked={startDateOption === 'immediate'}
+                      onChange={() => setStartDateOption('immediate')}
+                      className="w-4 h-4 accent-talpa-gold-600"
+                    />
+                    <span className="text-sm font-semibold text-slate-800">Hemen başlat</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Document Upload Area */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-1">
+                4. Belge Yükleme (Ruhsat & Apron Kartı)
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -566,9 +638,107 @@ export default function ApplicationFormPage() {
             </div>
 
             {/* Consents & Agreements */}
+            {role === 'kabin' && (
+              <div className="space-y-4 pt-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-1">
+                  5. Ödeme Bilgileri
+                </h3>
+                <PaymentCardVisual
+                  cardNumber={paymentCardNumber}
+                  cardholderName={paymentCardholderName}
+                  expiryMonth={paymentExpiryMonth}
+                  expiryYear={paymentExpiryYear}
+                  cvv={paymentCvv}
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-slate-800 uppercase mb-1">16 Haneli Kart Numarası <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={16}
+                      value={paymentCardNumber}
+                      onChange={(e) => setPaymentCardNumber(e.target.value.replace(/\D/g, '').slice(0, 16))}
+                      placeholder="1234567890123456"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-sm font-semibold tracking-wider text-slate-900 focus:bg-white focus:ring-2 focus:ring-talpa-gold-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-slate-800 uppercase mb-1">Kart Sahibinin İsim Soyismi <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      value={paymentCardholderName}
+                      onChange={(e) => setPaymentCardholderName(e.target.value.toUpperCase())}
+                      placeholder="AD SOYAD"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-talpa-gold-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 uppercase mb-1">Son Kullanma Ayı <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={paymentExpiryMonth}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 2);
+                        if (value.length === 2 && (!/^(0[1-9]|1[0-2])$/.test(value) || (paymentExpiryYear.length === 2 && new Date(2000 + Number(paymentExpiryYear), Number(value), 0) < new Date(new Date().getFullYear(), new Date().getMonth(), 1)))) {
+                          setPaymentError('Geçmiş veya geçersiz bir son kullanma tarihi girilemez.');
+                          return;
+                        }
+                        setPaymentExpiryMonth(value);
+                        setPaymentError('');
+                      }}
+                      placeholder="AA"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-talpa-gold-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 uppercase mb-1">Son Kullanma Yılı <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={paymentExpiryYear}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 2);
+                        if (value.length === 2 && paymentExpiryMonth.length === 2 && new Date(2000 + Number(value), Number(paymentExpiryMonth), 0) < new Date(new Date().getFullYear(), new Date().getMonth(), 1)) {
+                          setPaymentError('Geçmiş bir son kullanma tarihi girilemez.');
+                          return;
+                        }
+                        setPaymentExpiryYear(value);
+                        setPaymentError('');
+                      }}
+                      placeholder="YY"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-talpa-gold-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 uppercase mb-1">CVV <span className="text-red-500">*</span></label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={3}
+                      value={paymentCvv}
+                      onChange={(e) => setPaymentCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                      placeholder="123"
+                      className="w-full h-11 px-3.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-talpa-gold-400 focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                {paymentError && <p className="text-xs font-medium text-red-600">{paymentError}</p>}
+                <p className="text-[11px] text-slate-500">Aylık ücret: <strong>2.500 TL</strong>. CVV başvuru kaydında saklanmaz.</p>
+              </div>
+            )}
+
             <div className="space-y-3 pt-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                4. Onamlar ve Yasal İzinler
+                {role === 'kabin' ? '6.' : '5.'} Onamlar ve Yasal İzinler
               </h3>
 
               {/* KVKK Checkbox */}
@@ -592,6 +762,20 @@ export default function ApplicationFormPage() {
                   Metni Oku
                 </button>
               </div>
+
+              {role === 'kokpit' && (
+                <div className="flex items-start gap-2.5 text-xs bg-white p-3 rounded-xl border border-slate-200">
+                  <input
+                    type="checkbox"
+                    checked={paymentConsentAccepted}
+                    onChange={(e) => setPaymentConsentAccepted(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 accent-talpa-navy-900 rounded"
+                  />
+                  <span className="text-slate-800 font-medium">
+                    Aylık abonman bedelinin TALPA&apos;ya kayıtlı kartımdan alınmasını onaylıyorum. <span className="text-red-500">*</span>
+                  </span>
+                </div>
+              )}
 
               {/* Explicit Consent Checkbox */}
               <div className="flex items-start justify-between gap-3 text-xs bg-white p-3 rounded-xl border border-slate-200">
@@ -704,6 +888,14 @@ export default function ApplicationFormPage() {
                   setPhone('');
                   setPlate('');
                   setPlateConfirmed(false);
+                  setStartDateOption('');
+                  setPaymentConsentAccepted(false);
+                  setPaymentCardNumber('');
+                  setPaymentCardholderName('');
+                  setPaymentExpiryMonth('');
+                  setPaymentExpiryYear('');
+                  setPaymentCvv('');
+                  setPaymentError('');
                   setRuhsatImage('');
                   setApronCardImage('');
                   setKvkkAccepted(false);

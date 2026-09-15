@@ -13,6 +13,13 @@ export async function POST(req: NextRequest) {
       email,
       phone,
       plate,
+      startDateOption,
+      paymentConsentAccepted,
+      paymentCardNumber,
+      paymentCardholderName,
+      paymentExpiryMonth,
+      paymentExpiryYear,
+      paymentCvv,
       ruhsatImage,
       apronCardImage,
       kvkkAccepted,
@@ -45,6 +52,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Lütfen geçerli bir plaka bilgisi giriniz.' }, { status: 400 });
     }
 
+    if (startDateOption !== 'next_month' && startDateOption !== 'immediate') {
+      return NextResponse.json({ success: false, error: 'Lütfen geçerli bir abonelik başlangıç seçeneği belirtiniz.' }, { status: 400 });
+    }
+
+    if (role === 'kokpit' && paymentConsentAccepted !== true) {
+      return NextResponse.json({ success: false, error: 'Aylık abonman bedeli ödeme onamını kabul etmeniz gerekmektedir.' }, { status: 400 });
+    }
+
+    if (role === 'kabin') {
+      const normalizedCardNumber = String(paymentCardNumber || '').replace(/\s/g, '');
+      const expiryMonth = String(paymentExpiryMonth || '');
+      const expiryYear = String(paymentExpiryYear || '');
+      const cvv = String(paymentCvv || '');
+      const expiryDate = new Date(2000 + Number(expiryYear), Number(expiryMonth), 0);
+      const currentMonth = new Date();
+      currentMonth.setDate(1);
+      if (!/^\d{16}$/.test(normalizedCardNumber) || !/^\d{2}$/.test(expiryMonth) || !/^(0[1-9]|1[0-2])$/.test(expiryMonth) || !/^\d{2}$/.test(expiryYear) || !/^\d{3}$/.test(cvv) || !paymentCardholderName?.trim() || expiryDate < currentMonth) {
+        return NextResponse.json({ success: false, error: 'Lütfen geçerli ödeme kartı bilgilerini eksiksiz giriniz.' }, { status: 400 });
+      }
+    }
+
     if (!kvkkAccepted || !explicitConsentAccepted) {
       return NextResponse.json({ success: false, error: 'Devam etmek için KVKK ve Açık Rıza metinlerini onaylamanız gerekmektedir.' }, { status: 400 });
     }
@@ -59,6 +87,13 @@ export async function POST(req: NextRequest) {
       email: email.trim(),
       phone: phone.trim(),
       plate: formattedPlate,
+      startDateOption,
+      monthlyFee: role === 'kokpit' ? 2250 : 2500,
+      paymentConsentAccepted: role === 'kokpit',
+      paymentCardLast4: role === 'kabin' ? String(paymentCardNumber).replace(/\s/g, '').slice(-4) : undefined,
+      paymentCardholderName: role === 'kabin' ? paymentCardholderName.trim() : undefined,
+      paymentExpiryMonth: role === 'kabin' ? String(paymentExpiryMonth) : undefined,
+      paymentExpiryYear: role === 'kabin' ? String(paymentExpiryYear) : undefined,
       ruhsatImage: ruhsatImage || '',
       apronCardImage: apronCardImage || '',
       kvkkAccepted: true,

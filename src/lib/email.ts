@@ -28,6 +28,8 @@ function replacePlaceholders(template: string, app: ApplicationRecord): string {
   const roleTitle = app.role === 'kokpit' ? 'Kokpit Görevlisi (Pilot)' : 'Kabin Görevlisi';
   const talpaStatus = app.isTalpaMember ? 'Doğrulanmış TALPA Üyesi' : 'TALPA Üyesi Değil / İlgili Değil';
   const formattedDate = formatTurkishDate(app.createdAt);
+  const startDateText = app.startDateOption === 'next_month' ? 'Önümüzdeki Ay Başında' : 'Hemen Başlat';
+  const monthlyFeeText = `${app.monthlyFee?.toLocaleString('tr-TR') || (app.role === 'kokpit' ? '2.250' : '2.500')} TL / ay`;
 
   return template
     .replace(/\{\{NAME\}\}/g, app.name || '')
@@ -39,6 +41,8 @@ function replacePlaceholders(template: string, app: ApplicationRecord): string {
     .replace(/\{\{EMAIL\}\}/g, app.email || '')
     .replace(/\{\{PHONE\}\}/g, app.phone || '')
     .replace(/\{\{TALPA_STATUS\}\}/g, talpaStatus)
+    .replace(/\{\{START_DATE\}\}/g, startDateText)
+    .replace(/\{\{MONTHLY_FEE\}\}/g, monthlyFeeText)
     .replace(/\{\{DATE\}\}/g, formattedDate);
 }
 

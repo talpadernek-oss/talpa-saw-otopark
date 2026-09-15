@@ -749,6 +749,18 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                     {selectedApp.isTalpaMember ? 'Doğrulanmış Üye' : 'Üye Değil'}
                   </strong>
                 </div>
+                <div>
+                  <span className="text-slate-400 block font-semibold">Abonelik Başlangıcı</span>
+                  <strong className="text-slate-900 font-bold">
+                    {selectedApp.startDateOption === 'next_month' ? 'Önümüzdeki Ay Başında' : 'Hemen Başlat'}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-semibold">Aylık Ücret</span>
+                  <strong className="text-slate-900 font-bold">
+                    {selectedApp.monthlyFee.toLocaleString('tr-TR')} TL
+                  </strong>
+                </div>
               </div>
 
               {/* Uploaded Documents */}
