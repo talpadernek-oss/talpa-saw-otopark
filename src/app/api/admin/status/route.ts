@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateApplicationStatus } from '@/lib/storage';
 import { sendCustomEmail } from '@/lib/email';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/adminAuth';
 
 export async function POST(req: NextRequest) {
+  if (!isAdminRequest(req)) return unauthorizedResponse();
+
   try {
     const body = await req.json();
     const { action, id, status, adminNotes, forwardTo, forwardSubject, forwardBody } = body;

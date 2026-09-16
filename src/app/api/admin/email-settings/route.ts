@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEmailSettings, saveEmailSettings } from '@/lib/storage';
 import { sendCustomEmail } from '@/lib/email';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/adminAuth';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
+  if (!isAdminRequest(req)) return unauthorizedResponse();
+
   try {
     const settings = await getEmailSettings();
     return NextResponse.json({
@@ -15,6 +20,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isAdminRequest(req)) return unauthorizedResponse();
+
   try {
     const body = await req.json();
     const { action, adminNotificationEmail, applicantConfirmationTemplate, adminNotificationTemplate, testEmailAddress } = body;

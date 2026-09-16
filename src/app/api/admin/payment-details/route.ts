@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApplicationById } from '@/lib/storage';
 import { decryptCardNumber, formatCardNumber } from '@/lib/cardCrypto';
-import { isAdminRequest } from '@/lib/adminAuth';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +11,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
   try {
-    if (!isAdminRequest(req)) {
-      return NextResponse.json({ success: false, error: 'Yönetici doğrulaması başarısız. Lütfen çıkış yapıp yeniden giriş yapınız.' }, { status: 401 });
-    }
+    if (!isAdminRequest(req)) return unauthorizedResponse();
 
     const { id } = await req.json();
     if (!id || typeof id !== 'string') {

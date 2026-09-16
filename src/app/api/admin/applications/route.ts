@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApplications, getAdminStats, isPersistentStorageConfigured } from '@/lib/storage';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+  if (!isAdminRequest(req)) return unauthorizedResponse();
+
   try {
     const apps = await getApplications();
     const stats = await getAdminStats(apps);

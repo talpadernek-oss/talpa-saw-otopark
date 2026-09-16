@@ -61,33 +61,72 @@ export default function AdminPage() {
   const [testEmailAddr, setTestEmailAddr] = useState('');
   const [sendingTestMail, setSendingTestMail] = useState(false);
 
-  // Check saved session
+  // The admin secret lives in sessionStorage for this tab only and is sent as
+  // x-admin-key on every /api/admin request; the server validates it against
+  // ADMIN_SECRET_KEY. Nothing is stored across browser sessions.
+  const ADMIN_KEY_STORAGE = 'talpa_admin_key';
+  const getAdminKey = () => sessionStorage.getItem(ADMIN_KEY_STORAGE) || '';
+
+  const logout = (message = '') => {
+    sessionStorage.removeItem(ADMIN_KEY_STORAGE);
+    localStorage.removeItem('talpa_admin_auth'); // legacy flag from the old client-side login
+    setIsAuthenticated(false);
+    setPassword('');
+    setApplications([]);
+    setStats(null);
+    setSelectedApp(null);
+    setLoginError(message);
+  };
+
+  const adminFetch = async (input: string, init: RequestInit = {}) => {
+    const res = await fetch(input, {
+      ...init,
+      cache: 'no-store',
+      headers: { ...(init.headers || {}), 'x-admin-key': getAdminKey() }
+    });
+    if (res.status === 401) {
+      logout('Oturum doğrulanamadı. Lütfen yeniden giriş yapınız.');
+      throw new Error('unauthorized');
+    }
+    return res;
+  };
+
+  // Restore the session for this tab (key is re-validated by the first request)
   useEffect(() => {
-    const saved = localStorage.getItem('talpa_admin_auth');
-    if (saved === 'true') {
+    if (getAdminKey()) {
       setIsAuthenticated(true);
       fetchData();
+    } else {
+      localStorage.removeItem('talpa_admin_auth');
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'talpa2026admin' || password === 'admin') {
+    setLoginError('');
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        setLoginError(json.error || 'Geçersiz yönetici şifresi.');
+        return;
+      }
+      sessionStorage.setItem(ADMIN_KEY_STORAGE, password);
       setIsAuthenticated(true);
-      localStorage.setItem('talpa_admin_auth', 'true');
-      // Kept for this tab only; sent as x-admin-key when revealing card numbers
-      sessionStorage.setItem('talpa_admin_key', password);
-      setLoginError('');
       fetchData();
-    } else {
-      setLoginError('Geçersiz yönetici şifresi.');
+    } catch {
+      setLoginError('Sunucuya ulaşılamadı. Lütfen tekrar deneyiniz.');
     }
   };
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/applications?refresh=1', { cache: 'no-store' });
+      const res = await adminFetch('/api/admin/applications?refresh=1');
       const json = await res.json();
       if (json.success) {
         setApplications(json.data.applications);
@@ -95,7 +134,7 @@ export default function AdminPage() {
         setPersistentStorage(json.data.persistentStorage ?? null);
       }
 
-      const settingsRes = await fetch('/api/admin/email-settings');
+      const settingsRes = await adminFetch('/api/admin/email-settings');
       const settingsJson = await settingsRes.json();
       if (settingsJson.success) {
         setEmailSettings(settingsJson.data);
@@ -112,7 +151,7 @@ export default function AdminPage() {
 
   const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected' | 'pending') => {
     try {
-      const res = await fetch('/api/admin/status', {
+      const res = await adminFetch('/api/admin/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status: newStatus })
@@ -136,10 +175,9 @@ export default function AdminPage() {
     setCardLoading(true);
     setCardError('');
     try {
-      const adminKey = sessionStorage.getItem('talpa_admin_key') || '';
-      const res = await fetch('/api/admin/payment-details', {
+      const res = await adminFetch('/api/admin/payment-details', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: selectedApp.id })
       });
       const json = await res.json();
@@ -180,7 +218,7 @@ TALPA Üyeliği: ${selectedApp.isTalpaMember ? 'Doğrulanmış Üye' : 'Üye De�
 Tarih: ${formatTurkishDate(selectedApp.createdAt)}
 Statü: ${selectedApp.status.toUpperCase()}`;
 
-      const res = await fetch('/api/admin/status', {
+      const res = await adminFetch('/api/admin/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -214,7 +252,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
     setSettingsMsg({ text: '', isError: false });
 
     try {
-      const res = await fetch('/api/admin/email-settings', {
+      const res = await adminFetch('/api/admin/email-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -246,7 +284,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
 
     setSendingTestMail(true);
     try {
-      const res = await fetch('/api/admin/email-settings', {
+      const res = await adminFetch('/api/admin/email-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -352,11 +390,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
             </button>
 
             <button
-              onClick={() => {
-                localStorage.removeItem('talpa_admin_auth');
-                sessionStorage.removeItem('talpa_admin_key');
-                setIsAuthenticated(false);
-              }}
+              onClick={() => logout()}
               className="px-3.5 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-medium rounded-xl border border-red-500/30 transition-colors"
             >
               Çıkış Yap

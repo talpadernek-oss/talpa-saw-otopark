@@ -1,4 +1,4 @@
-﻿# 🚗 TALPA Otopark Asıl Plaka Belirleme ve Yönetim Sistemi
+# 🚗 TALPA Otopark Asıl Plaka Belirleme ve Yönetim Sistemi
 
 Bu web uygulaması; Türkiye Havayolu Pilotları Derneği (TALPA) kurumsal kimliğine ve [TALPA Danışmanlık](https://danisman.talpa.org/) tasarım standartlarına uygun olarak geliştirilmiştir.
 
@@ -22,7 +22,7 @@ Otopark bariyer sisteminde kayıtlı 2 plakası bulunan yaklaşık 800 üyenin/k
    - **Sonuç ve Başvuru Dekontu**: Onay rozeti, referans kodu, PDF/Yazdırma dökümü ve seçim güncelleme imkanı.
 
 3. **Yönetici & Excel Portalı (/admin)**:
-   - **Şifre Korumalı**: Varsayılan PIN: `talpa2026`
+   - **Şifre Korumalı**: Şifre sunucu tarafında `ADMIN_SECRET_KEY` ortam değişkeniyle doğrulanır; tüm `/api/admin/*` uçları bu anahtarı ister.
    - **Excel İçe Aktarma (Import)**: Elinizdeki Excel tablosunu (`İsim`, `TC`, `Plaka 1`, `Plaka 2`) sürükle-bırak yöntemiyle tek seferde sisteme yükleme.
    - **Canlı İstatistikler**: Toplam üye, seçim yapanlar, 1. plakayı seçenler, 2. plakayı seçenler, yeni plaka ekleyenler ve bekleyenler.
    - **Tek Tıkla Nihai Excel İndirme (Export)**: Tüm 800 kişinin kesinleşmiş tekil asıl plakalarını (işlem yapmayanların otomatik Plaka 1 değeri dahil) Excel (.xlsx) olarak indirme.
@@ -70,4 +70,6 @@ http://localhost:3000
 
 ## 🔐 Yönetici Paneli Giriş Bilgileri
 - **URL**: `/admin`
-- **Varsayılan PIN/Şifre**: `talpa2026`
+- **Şifre**: `ADMIN_SECRET_KEY` ortam değişkeninin değeri (varsayılan şifre yoktur; Vercel'de uzun ve rastgele bir değer tanımlayın)
+- Oturum yalnızca açık sekmede tutulur (sessionStorage); sekme kapanınca yeniden giriş gerekir
+- Kabin başvurularının kart numarası `PAYMENT_ENCRYPTION_KEY` ile şifreli saklanır ve yalnızca girişli yönetici tarafından görüntülenebilir; CVV saklanmaz
