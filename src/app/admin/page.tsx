@@ -201,31 +201,15 @@ export default function AdminPage() {
     setForwardMsg({ text: '', isError: false });
 
     try {
-      const subject = `[İletildi] SAW Otopark Ek Kontenjan Başvurusu - ${selectedApp.name} (${selectedApp.plate})`;
-      const body = `Yönetici Tarafından İletilen Başvuru Detayları:
-
-Referans Kodu: ${selectedApp.referenceCode}
-Ad Soyad: ${selectedApp.name}
-Görevi: ${selectedApp.role === 'kokpit' ? 'Kokpit Görevlisi (Pilot)' : 'Kabin Görevlisi'}
-T.C. Kimlik No: ${selectedApp.tc}
-E-posta: ${selectedApp.email}
-Telefon: ${selectedApp.phone}
-Plaka: ${selectedApp.plate}
-Abonelik Başlangıcı: ${selectedApp.startDateOption === 'next_month' ? 'Önümüzdeki Ay Başında' : 'Hemen Başlat'}
-Aylık Ücret: ${selectedApp.monthlyFee.toLocaleString('tr-TR')} TL
-Ödeme Bilgisi: ${getPaymentSummary(selectedApp)}
-TALPA Üyeliği: ${selectedApp.isTalpaMember ? 'Doğrulanmış Üye' : 'Üye Değil'}
-Tarih: ${formatTurkishDate(selectedApp.createdAt)}
-Statü: ${selectedApp.status.toUpperCase()}`;
-
+      // The server composes the subscription-request email from the template
+      // and attaches the ruhsat image.
       const res = await adminFetch('/api/admin/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'forward',
-          forwardTo: forwardEmailTo,
-          forwardSubject: subject,
-          forwardBody: body
+          id: selectedApp.id,
+          forwardTo: forwardEmailTo
         })
       });
 
@@ -276,8 +260,31 @@ Statü: ${selectedApp.status.toUpperCase()}`;
     }
   };
 
-  const handleSendTestMail = async () => {
-    if (!testEmailAddr || !testEmailAddr.includes('@')) {
+  const handleResetTemplates = async () => {
+    if (!confirm('E-posta şablonları varsayılan metinlere döndürülecek. Devam edilsin mi?')) return;
+    setSavingSettings(true);
+    setSettingsMsg({ text: '', isError: false });
+    try {
+      const res = await adminFetch('/api/admin/email-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset-templates' })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setEmailSettings(json.data);
+        setSettingsMsg({ text: json.message, isError: false });
+      } else {
+        setSettingsMsg({ text: json.error || 'Şablonlar sıfırlanamadı.', isError: true });
+      }
+    } catch {
+      setSettingsMsg({ text: 'Sunucu hatası.', isError: true });
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleSendTestMail = async () => {    if (!testEmailAddr || !testEmailAddr.includes('@')) {
       alert('Lütfen test için geçerli e-posta adresi giriniz.');
       return;
     }
@@ -608,14 +615,25 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                 </p>
               </div>
 
-              <button
-                type="submit"
-                disabled={savingSettings}
-                className="px-5 py-2.5 bg-talpa-navy-900 hover:bg-talpa-navy-800 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer"
-              >
-                <CheckCircle2 className="w-4 h-4 text-talpa-gold-400" />
-                <span>Ayarları Kaydet</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleResetTemplates}
+                  disabled={savingSettings}
+                  className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold rounded-xl text-xs flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Varsayılan Şablonlara Dön</span>
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="px-5 py-2.5 bg-talpa-navy-900 hover:bg-talpa-navy-800 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-talpa-gold-400" />
+                  <span>Ayarları Kaydet</span>
+                </button>
+              </div>
             </div>
 
             {settingsMsg.text && (
@@ -708,8 +726,11 @@ Statü: ${selectedApp.status.toUpperCase()}`;
             {/* Admin Notification Template */}
             <div className="space-y-4 pt-4 border-t border-slate-200">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-1">
-                2. Yöneticiye Gönderilecek Bildirim E-postası Şablonu
+                2. Abonelik Kaydı Talebi Şablonu (talpa@talpa.org bildirimi ve otoparka &quot;Mail İlet&quot;)
               </h3>
+              <p className="text-[11px] text-slate-500">
+                Kullanılabilir alanlar: {'{{NAME}}'}, {'{{PLATE}}'}, {'{{REF_CODE}}'}, {'{{TC}}'}, {'{{EMAIL}}'}, {'{{PHONE}}'}, {'{{ROLE_TITLE}}'}, {'{{START_DATE}}'}, {'{{MONTHLY_FEE}}'}, {'{{PAYMENT_INFO}}'}, {'{{TALPA_STATUS}}'}, {'{{DATE}}'}. Ruhsat görseli otomatik eklenir.
+              </p>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">E-posta Konusu</label>
@@ -956,7 +977,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
               <div className="bg-slate-100/80 p-4 rounded-2xl border border-slate-200 space-y-3">
                 <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <Mail className="w-4 h-4 text-talpa-navy-900" />
-                  <span>Bu Başvuru Detaylarını Başka Adrese Gönder / İlet</span>
+                  <span>Otopark İşletmesine Abonelik Kaydı Talebi Gönder</span>
                 </h4>
 
                 <form onSubmit={handleForwardEmail} className="flex gap-2">
@@ -964,7 +985,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                     type="email"
                     value={forwardEmailTo}
                     onChange={(e) => setForwardEmailTo(e.target.value)}
-                    placeholder="Alıcı e-posta adresi giriniz..."
+                    placeholder="Otopark yetkilisinin e-posta adresi..."
                     className="flex-1 h-10 px-3 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none"
                     required
                   />
@@ -977,6 +998,9 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                     <span>Mail İlet</span>
                   </button>
                 </form>
+                <p className="text-[11px] text-slate-500">
+                  E-posta, ayarlardaki &quot;Abonelik Kaydı Talebi&quot; şablonuyla ve ruhsat görseli ekli olarak gönderilir.
+                </p>
 
                 {forwardMsg.text && (
                   <div className={`text-xs p-2 rounded-lg font-medium ${forwardMsg.isError ? 'text-red-700 bg-red-50' : 'text-emerald-800 bg-emerald-50'}`}>

@@ -1,28 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateApplicationStatus } from '@/lib/storage';
-import { sendCustomEmail } from '@/lib/email';
+import { updateApplicationStatus, getApplicationById } from '@/lib/storage';
+import { sendApplicationForwardEmail } from '@/lib/email';
 import { isAdminRequest, unauthorizedResponse } from '@/lib/adminAuth';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   if (!isAdminRequest(req)) return unauthorizedResponse();
 
   try {
     const body = await req.json();
-    const { action, id, status, adminNotes, forwardTo, forwardSubject, forwardBody } = body;
+    const { action, id, status, adminNotes, forwardTo } = body;
 
+    // Forward the application (template + ruhsat attachment) to e.g. the parking operator
     if (action === 'forward') {
-      if (!forwardTo || !forwardTo.includes('@')) {
+      if (!forwardTo || typeof forwardTo !== 'string' || !forwardTo.includes('@')) {
         return NextResponse.json({ success: false, error: 'Lütfen geçerli bir alıcı e-posta adresi giriniz.' }, { status: 400 });
       }
 
-      const result = await sendCustomEmail(forwardTo, forwardSubject || 'Başvuru İletimi', forwardBody || '');
+      const app = id ? await getApplicationById(id) : null;
+      if (!app) {
+        return NextResponse.json({ success: false, error: 'Başvuru bulunamadı.' }, { status: 404 });
+      }
+
+      const result = await sendApplicationForwardEmail(app, forwardTo.trim());
       if (!result.success) {
         return NextResponse.json({ success: false, error: result.error || 'E-posta iletilemedi.' }, { status: 500 });
       }
 
       return NextResponse.json({
         success: true,
-        message: `Başvuru detayları ${forwardTo} adresine e-posta ile iletildi.`
+        message: `Abonelik kaydı talebi (ruhsat ekiyle) ${forwardTo.trim()} adresine iletildi.`
       });
     }
 

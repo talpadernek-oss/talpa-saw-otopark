@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getEmailSettings, saveEmailSettings } from '@/lib/storage';
+import { getEmailSettings, saveEmailSettings, getDefaultEmailSettings } from '@/lib/storage';
 import { sendCustomEmail } from '@/lib/email';
 import { isAdminRequest, unauthorizedResponse } from '@/lib/adminAuth';
 
@@ -53,6 +53,23 @@ Dernek / Sistem Yönetimi`;
     }
 
     const currentSettings = await getEmailSettings();
+
+    // Restore the built-in templates (keeps the configured recipient address)
+    if (action === 'reset-templates') {
+      const defaults = getDefaultEmailSettings();
+      const restored = {
+        ...currentSettings,
+        applicantConfirmationTemplate: defaults.applicantConfirmationTemplate,
+        adminNotificationTemplate: defaults.adminNotificationTemplate
+      };
+      await saveEmailSettings(restored);
+      return NextResponse.json({
+        success: true,
+        message: 'E-posta şablonları varsayılan metinlere döndürüldü.',
+        data: restored
+      });
+    }
+
     const newSettings = {
       ...currentSettings,
       adminNotificationEmail: adminNotificationEmail || currentSettings.adminNotificationEmail,

@@ -110,23 +110,49 @@ export async function sendAdminNotificationEmail(app: ApplicationRecord): Promis
 
     const subject = replacePlaceholders(settings.adminNotificationTemplate.subject, app);
     const textBody = replacePlaceholders(settings.adminNotificationTemplate.body, app);
-    const attachments = [
-      createImageAttachment(app.ruhsatImage, `ruhsat-${app.referenceCode}`),
-      createImageAttachment(app.apronCardImage, `apron-karti-${app.referenceCode}`)
-    ].filter((a): a is NonNullable<typeof a> => Boolean(a));
+    const ruhsatAttachment = createImageAttachment(app.ruhsatImage, `ruhsat-${app.referenceCode}`);
 
     await transporter.sendMail({
       from: `"TALPA SAW Otopark Portalı" <${user}>`,
       to: recipients,
       subject,
       text: textBody,
-      attachments: attachments.length ? attachments : undefined
+      attachments: ruhsatAttachment ? [ruhsatAttachment] : undefined
     });
 
     return { success: true };
   } catch (err: any) {
     console.error('Error sending admin notification email:', err);
     return { success: false, error: err.message || 'Admin e-postası gönderilemedi.' };
+  }
+}
+
+/**
+ * Forward an application to an arbitrary address (e.g. the parking operator)
+ * using the same subscription-request template and the ruhsat image attachment.
+ */
+export async function sendApplicationForwardEmail(app: ApplicationRecord, to: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const settings = await getEmailSettings();
+    const transporter = createTransporter();
+    const user = process.env.SMTP_USER || 'talpa@talpa.org';
+
+    const subject = replacePlaceholders(settings.adminNotificationTemplate.subject, app);
+    const textBody = replacePlaceholders(settings.adminNotificationTemplate.body, app);
+    const ruhsatAttachment = createImageAttachment(app.ruhsatImage, `ruhsat-${app.referenceCode}`);
+
+    await transporter.sendMail({
+      from: `"TALPA SAW Otopark Portalı" <${user}>`,
+      to,
+      subject,
+      text: textBody,
+      attachments: ruhsatAttachment ? [ruhsatAttachment] : undefined
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Error forwarding application email:', err);
+    return { success: false, error: err.message || 'E-posta iletilemedi.' };
   }
 }
 

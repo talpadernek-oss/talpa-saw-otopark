@@ -126,26 +126,16 @@ Başvurunuz yetkililer tarafından incelenecek ve durum güncellendiğinde taraf
 Saygılarımızla,
 Türkiye Havayolu Pilotları Derneği (TALPA)`
   },
+  // Sent to talpa@talpa.org for every application and used verbatim when an
+  // application is forwarded to the parking operator (ruhsat image attached).
   adminNotificationTemplate: {
-    subject: 'Yeni SAW Otopark Ek Kontenjan Başvurusu - {{NAME}} ({{PLATE}})',
-    body: `Sistemde Yeni Bir SAW Otopark Ek Kontenjan Başvurusu Oluşturuldu:
+    subject: 'SAW Otopark Abonelik Kaydı Talebi - {{NAME}} ({{PLATE}})',
+    body: `Sayın Yetkili,
 
-Başvuran Bilgileri:
------------------------------
-Ad Soyad: {{NAME}}
-Görevi: {{ROLE_TITLE}}
-T.C. Kimlik No: {{TC}}
-E-posta: {{EMAIL}}
-Telefon: {{PHONE}}
-Plaka: {{PLATE}}
-Abonelik Başlangıcı: {{START_DATE}}
-Aylık Ücret: {{MONTHLY_FEE}}
-Ödeme Bilgisi: {{PAYMENT_INFO}}
-TALPA Üyeliği: {{TALPA_STATUS}}
-Referans Kodu: {{REF_CODE}}
-Tarih: {{DATE}}
+Üyemiz {{NAME}} adına otoparkınıza {{PLATE}} plakalı aracı ile abonelik kaydı oluşturulmasını rica eder iyi çalışmalar dileriz.
 
-Yönetim panelinden başvuruyu inceleyebilirsiniz.`
+Saygılarımızla,
+Türkiye Havayolu Pilotları Derneği (TALPA)`
   }
 };
 
@@ -301,6 +291,10 @@ export async function deleteApplication(id: string): Promise<boolean> {
   const remaining = apps.filter(a => a.id !== id);
   if (remaining.length === apps.length) return false;
   return writeApplicationsToFile(remaining);
+}
+
+export function getDefaultEmailSettings(): EmailSettings {
+  return { ...DEFAULT_EMAIL_SETTINGS };
 }
 
 export async function getEmailSettings(): Promise<EmailSettings> {
