@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       apronCardImage,
       kvkkAccepted,
       explicitConsentAccepted,
+      parkingTermsAccepted,
       isTalpaMember
     } = body;
 
@@ -78,6 +79,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Devam etmek için KVKK ve Açık Rıza metinlerini onaylamanız gerekmektedir.' }, { status: 400 });
     }
 
+    if (parkingTermsAccepted !== true) {
+      return NextResponse.json({ success: false, error: 'Devam etmek için Otopark Kullanım Talimatını okuyup onaylamanız gerekmektedir.' }, { status: 400 });
+    }
+
     const formattedPlate = formatPlate(plate);
     const normalizedCardNumber = role === 'kabin' ? String(paymentCardNumber).replace(/\s/g, '') : '';
 
@@ -101,6 +106,7 @@ export async function POST(req: NextRequest) {
       apronCardImage: apronCardImage || '',
       kvkkAccepted: true,
       explicitConsentAccepted: true,
+      parkingTermsAccepted: true,
       isTalpaMember: role === 'kokpit' ? (isTalpaMember ?? true) : false
     });
 

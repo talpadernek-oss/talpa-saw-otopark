@@ -868,6 +868,25 @@ export default function AdminPage() {
                     {getPaymentSummary(selectedApp)}
                   </strong>
                 </div>
+                <div className="col-span-2 sm:col-span-3">
+                  <span className="text-slate-400 block font-semibold">Onamlar</span>
+                  <div className="flex flex-wrap gap-1.5 mt-0.5">
+                    {[
+                      { label: 'KVKK Aydınlatma', ok: selectedApp.kvkkAccepted },
+                      { label: 'Açık Rıza', ok: selectedApp.explicitConsentAccepted },
+                      { label: 'Otopark Kullanım Talimatı', ok: selectedApp.parkingTermsAccepted === true },
+                      ...(selectedApp.role === 'kokpit' ? [{ label: 'Kayıtlı Karttan Tahsilat', ok: selectedApp.paymentConsentAccepted === true }] : [])
+                    ].map(item => (
+                      <span
+                        key={item.label}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${item.ok ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}`}
+                      >
+                        {item.ok ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        {item.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Card details (kabin only) - revealed on demand via admin-key protected endpoint */}

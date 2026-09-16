@@ -21,6 +21,7 @@ import RuhsatUploadFrame from '@/components/RuhsatUploadFrame';
 import ApronUploadFrame from '@/components/ApronUploadFrame';
 import PaymentCardVisual from '@/components/PaymentCardVisual';
 import ConsentModal from '@/components/ConsentModal';
+import ParkingTermsModal from '@/components/ParkingTermsModal';
 import { isValidTCKN, formatPlate } from '@/lib/tckn';
 import { RoleType, StartDateOption, ApplicationRecord } from '@/types';
 
@@ -57,9 +58,10 @@ export default function ApplicationFormPage() {
   // Consent states
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
   const [explicitConsentAccepted, setExplicitConsentAccepted] = useState(false);
+  const [parkingTermsAccepted, setParkingTermsAccepted] = useState(false);
 
   // Modal control
-  const [activeModal, setActiveModal] = useState<'kvkk' | 'explicit' | null>(null);
+  const [activeModal, setActiveModal] = useState<'kvkk' | 'explicit' | 'parking' | null>(null);
 
   // Submission state
   const [submitting, setSubmitting] = useState(false);
@@ -73,7 +75,7 @@ export default function ApplicationFormPage() {
     name, tc, email, phone, plate, plateConfirmed, startDateOption,
     paymentConsentAccepted, paymentCardNumber, paymentCardholderName,
     paymentExpiryMonth, paymentExpiryYear, paymentCvv,
-    ruhsatImage, apronCardImage, kvkkAccepted, explicitConsentAccepted
+    ruhsatImage, apronCardImage, kvkkAccepted, explicitConsentAccepted, parkingTermsAccepted
   ]);
 
   // Step 1: Select Role
@@ -189,6 +191,10 @@ export default function ApplicationFormPage() {
       setFormError('Lütfen KVKK Aydınlatma Metni ve Açık Rıza Metnini onaylayınız.');
       return;
     }
+    if (!parkingTermsAccepted) {
+      setFormError('Lütfen Otopark Kullanım Talimatını okuyup onaylayınız.');
+      return;
+    }
 
     setFormError('');
     setSubmitting(true);
@@ -215,6 +221,7 @@ export default function ApplicationFormPage() {
           apronCardImage,
           kvkkAccepted,
           explicitConsentAccepted,
+          parkingTermsAccepted,
           isTalpaMember
         })
       });
@@ -819,6 +826,39 @@ export default function ApplicationFormPage() {
                   Metni Oku
                 </button>
               </div>
+
+              {/* Parking Terms Checkbox - can only be ticked via the modal's "Okudum, Onaylıyorum" button */}
+              <div className={`flex items-start justify-between gap-3 text-xs p-3 rounded-xl border ${parkingTermsAccepted ? 'bg-emerald-50/40 border-emerald-300' : 'bg-white border-slate-200'}`}>
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={parkingTermsAccepted}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setActiveModal('parking'); // show the terms; acceptance happens in the modal
+                      } else {
+                        setParkingTermsAccepted(false);
+                      }
+                    }}
+                    className="w-4 h-4 mt-0.5 accent-talpa-navy-900 rounded"
+                  />
+                  <span className="text-slate-800 font-medium">
+                    <strong className="text-slate-900">Otopark Kullanım Talimatını</strong> okudum, kabul ve taahhüt ediyorum. <span className="text-red-500">*</span>
+                    {parkingTermsAccepted && (
+                      <span className="ml-1.5 inline-flex items-center gap-1 text-emerald-700 font-semibold">
+                        <CheckCircle2 className="w-3 h-3" /> Onaylandı
+                      </span>
+                    )}
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setActiveModal('parking')}
+                  className="text-talpa-navy-800 hover:text-talpa-gold-600 font-semibold underline shrink-0 text-[11px]"
+                >
+                  Metni Oku
+                </button>
+              </div>
             </div>
 
             {formError && (
@@ -921,6 +961,7 @@ export default function ApplicationFormPage() {
                   setApronCardImage('');
                   setKvkkAccepted(false);
                   setExplicitConsentAccepted(false);
+                  setParkingTermsAccepted(false);
                   setIsTalpaMember(null);
                   setSubmittedApp(null);
                 }}
@@ -946,6 +987,15 @@ export default function ApplicationFormPage() {
         onClose={() => setActiveModal(null)}
         title="Açık Rıza Metni"
         type="explicit"
+      />
+
+      <ParkingTermsModal
+        isOpen={activeModal === 'parking'}
+        onClose={() => setActiveModal(null)}
+        onAccept={() => {
+          setParkingTermsAccepted(true);
+          setActiveModal(null);
+        }}
       />
     </div>
   );

@@ -25,6 +25,7 @@ export interface ApplicationRecord {
   apronCardImage?: string; // base64 or path
   kvkkAccepted: boolean;
   explicitConsentAccepted: boolean;
+  parkingTermsAccepted?: boolean; // "Otopark Kullanım Talimatı" accepted via the modal button (required since 2026-09)
   isTalpaMember?: boolean;
   status: ApplicationStatus;
   adminNotes?: string;
