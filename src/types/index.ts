@@ -16,6 +16,7 @@ export interface ApplicationRecord {
   startDateOption: StartDateOption;
   monthlyFee: number; // 2250 TL for Kokpit/TALPA, 2500 TL for Kabin
   paymentCardLast4?: string;
+  paymentCardEncrypted?: string; // AES-256-GCM ciphertext of the full card number (kabin only); never sent to the client list
   paymentCardholderName?: string;
   paymentExpiryMonth?: string;
   paymentExpiryYear?: string;

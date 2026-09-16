@@ -32,10 +32,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Başvuru bulunamadı.' }, { status: 404 });
     }
 
+    const { paymentCardEncrypted: _encrypted, ...publicUpdated } = updated;
+
     return NextResponse.json({
       success: true,
       message: 'Başvuru durumu başarıyla güncellendi.',
-      data: updated
+      data: publicUpdated
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: 'İşlem gerçekleştirilemedi.' }, { status: 500 });

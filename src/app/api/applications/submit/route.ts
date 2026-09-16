@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { addApplication } from '@/lib/storage';
 import { sendApplicantConfirmationEmail, sendAdminNotificationEmail } from '@/lib/email';
 import { isValidTCKN, formatPlate } from '@/lib/tckn';
+import { encryptCardNumber } from '@/lib/cardCrypto';
 
 export async function POST(req: NextRequest) {
   try {
@@ -78,8 +79,9 @@ export async function POST(req: NextRequest) {
     }
 
     const formattedPlate = formatPlate(plate);
+    const normalizedCardNumber = role === 'kabin' ? String(paymentCardNumber).replace(/\s/g, '') : '';
 
-    // Save record
+    // Save record (card number encrypted at rest; CVV is never stored)
     const application = await addApplication({
       role,
       tc: tc.trim(),
@@ -90,7 +92,8 @@ export async function POST(req: NextRequest) {
       startDateOption,
       monthlyFee: role === 'kokpit' ? 2250 : 2500,
       paymentConsentAccepted: role === 'kokpit',
-      paymentCardLast4: role === 'kabin' ? String(paymentCardNumber).replace(/\s/g, '').slice(-4) : undefined,
+      paymentCardLast4: role === 'kabin' ? normalizedCardNumber.slice(-4) : undefined,
+      paymentCardEncrypted: role === 'kabin' ? encryptCardNumber(normalizedCardNumber) : undefined,
       paymentCardholderName: role === 'kabin' ? paymentCardholderName.trim() : undefined,
       paymentExpiryMonth: role === 'kabin' ? String(paymentExpiryMonth) : undefined,
       paymentExpiryYear: role === 'kabin' ? String(paymentExpiryYear) : undefined,
@@ -109,10 +112,12 @@ export async function POST(req: NextRequest) {
       console.log('Automated emails triggered:', results);
     });
 
+    const { paymentCardEncrypted: _encrypted, ...publicApplication } = application;
+
     return NextResponse.json({
       success: true,
       message: 'SAW Otopark Ek Kontenjan başvurunuz başarıyla alınmıştır.',
-      data: application
+      data: publicApplication
     });
   } catch (error: any) {
     console.error('Submission error:', error);

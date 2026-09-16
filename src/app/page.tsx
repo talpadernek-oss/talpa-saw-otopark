@@ -753,7 +753,7 @@ export default function ApplicationFormPage() {
                   </div>
                 </div>
                 {paymentError && <p className="text-xs font-medium text-red-600">{paymentError}</p>}
-                <p className="text-[11px] text-slate-500">Aylık ücret: <strong>2.500 TL</strong>. CVV başvuru kaydında saklanmaz.</p>
+                <p className="text-[11px] text-slate-500">Aylık ücret: <strong>2.500 TL</strong>. Kart numaranız şifrelenerek saklanır ve yalnızca yetkili personel tarafından görüntülenir; CVV başvuru kaydında saklanmaz.</p>
               </div>
             )}
 

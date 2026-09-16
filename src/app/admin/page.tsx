@@ -49,6 +49,11 @@ export default function AdminPage() {
   const [forwarding, setForwarding] = useState(false);
   const [forwardMsg, setForwardMsg] = useState({ text: '', isError: false });
 
+  // Revealed card details (kabin) for the selected application
+  const [cardDetails, setCardDetails] = useState<{ cardNumberFormatted: string; cardholderName: string; expiryMonth: string; expiryYear: string } | null>(null);
+  const [cardLoading, setCardLoading] = useState(false);
+  const [cardError, setCardError] = useState('');
+
   // Email Settings state
   const [emailSettings, setEmailSettings] = useState<EmailSettings | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -70,6 +75,8 @@ export default function AdminPage() {
     if (password === 'talpa2026admin' || password === 'admin') {
       setIsAuthenticated(true);
       localStorage.setItem('talpa_admin_auth', 'true');
+      // Kept for this tab only; sent as x-admin-key when revealing card numbers
+      sessionStorage.setItem('talpa_admin_key', password);
       setLoginError('');
       fetchData();
     } else {
@@ -121,6 +128,30 @@ export default function AdminPage() {
       }
     } catch (e) {
       alert('Statü güncellenemedi.');
+    }
+  };
+
+  const handleRevealCard = async () => {
+    if (!selectedApp) return;
+    setCardLoading(true);
+    setCardError('');
+    try {
+      const adminKey = sessionStorage.getItem('talpa_admin_key') || '';
+      const res = await fetch('/api/admin/payment-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+        body: JSON.stringify({ id: selectedApp.id })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setCardDetails(json.data);
+      } else {
+        setCardError(json.error || 'Kart bilgisi alınamadı.');
+      }
+    } catch (e) {
+      setCardError('Bağlantı hatası.');
+    } finally {
+      setCardLoading(false);
     }
   };
 
@@ -323,6 +354,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
             <button
               onClick={() => {
                 localStorage.removeItem('talpa_admin_auth');
+                sessionStorage.removeItem('talpa_admin_key');
                 setIsAuthenticated(false);
               }}
               className="px-3.5 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-medium rounded-xl border border-red-500/30 transition-colors"
@@ -512,7 +544,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                           </td>
                           <td className="py-3.5 px-4 text-right">
                             <button
-                              onClick={() => setSelectedApp(app)}
+                              onClick={() => { setSelectedApp(app); setCardDetails(null); setCardError(''); }}
                               className="px-3 py-1.5 bg-talpa-navy-900 hover:bg-talpa-navy-800 text-white rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 shadow-xs transition-colors"
                             >
                               <Eye className="w-3.5 h-3.5 text-talpa-gold-400" />
@@ -694,7 +726,7 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                 <h3 className="font-serif text-lg font-bold">{selectedApp.name}</h3>
               </div>
               <button
-                onClick={() => setSelectedApp(null)}
+                onClick={() => { setSelectedApp(null); setCardDetails(null); setCardError(''); }}
                 className="text-slate-400 hover:text-white p-1 rounded-lg"
               >
                 ✕
@@ -782,6 +814,70 @@ Statü: ${selectedApp.status.toUpperCase()}`;
                   </strong>
                 </div>
               </div>
+
+              {/* Card details (kabin only) - revealed on demand via admin-key protected endpoint */}
+              {selectedApp.role === 'kabin' && (
+                <div className="space-y-3 border border-slate-200 p-4 rounded-2xl bg-white">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-bold text-slate-700 flex items-center gap-1.5 text-xs">
+                      <CreditCard className="w-4 h-4 text-talpa-navy-700" />
+                      <span>Kart Bilgileri</span>
+                    </span>
+                    {cardDetails ? (
+                      <button
+                        type="button"
+                        onClick={() => setCardDetails(null)}
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-[11px] font-semibold"
+                      >
+                        Gizle
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleRevealCard}
+                        disabled={cardLoading}
+                        className="px-3 py-1.5 bg-talpa-navy-900 hover:bg-talpa-navy-800 text-white rounded-lg text-[11px] font-semibold inline-flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        {cardLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5 text-talpa-gold-400" />}
+                        <span>Kart Numarasını Göster</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50/50 p-3 rounded-xl border border-slate-200">
+                    <div className="col-span-2 sm:col-span-3">
+                      <span className="text-slate-400 block font-semibold">Kart Numarası</span>
+                      <strong className="text-slate-900 font-mono font-bold text-sm tracking-wider">
+                        {cardDetails ? cardDetails.cardNumberFormatted : `**** **** **** ${selectedApp.paymentCardLast4 || '----'}`}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-semibold">Kart Sahibi</span>
+                      <strong className="text-slate-900 font-bold">{selectedApp.paymentCardholderName || '-'}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-semibold">Son Kullanma</span>
+                      <strong className="text-slate-900 font-mono font-bold">
+                        {selectedApp.paymentExpiryMonth && selectedApp.paymentExpiryYear ? `${selectedApp.paymentExpiryMonth}/${selectedApp.paymentExpiryYear}` : '-'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-semibold">CVV</span>
+                      <strong className="text-slate-500 font-bold">Saklanmaz</strong>
+                    </div>
+                  </div>
+
+                  {cardError && (
+                    <p className="flex items-center gap-1.5 text-[11px] font-medium text-red-600">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{cardError}</span>
+                    </p>
+                  )}
+                  <p className="text-[11px] text-slate-500">
+                    Kart numarası şifreli saklanır ve yalnızca yönetici şifresi doğrulanarak görüntülenir. CVV, PCI DSS gereği hiçbir koşulda kaydedilmez.
+                  </p>
+                </div>
+              )}
 
               {/* Uploaded Documents */}
               <div className="space-y-4">

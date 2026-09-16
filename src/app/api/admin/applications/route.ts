@@ -8,10 +8,17 @@ export async function GET(req: NextRequest) {
     const apps = await getApplications();
     const stats = await getAdminStats(apps);
 
+    // Never ship the encrypted card number to the browser; it is revealed
+    // on demand through /api/admin/payment-details.
+    const publicApps = apps.map(({ paymentCardEncrypted, ...rest }) => ({
+      ...rest,
+      hasFullCardNumber: Boolean(paymentCardEncrypted)
+    }));
+
     return NextResponse.json({
       success: true,
       data: {
-        applications: apps,
+        applications: publicApps,
         stats,
         persistentStorage: isPersistentStorageConfigured()
       }
